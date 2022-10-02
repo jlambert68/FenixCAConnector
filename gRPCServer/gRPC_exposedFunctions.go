@@ -3,13 +3,13 @@ package gRPCServer
 import "github.com/sirupsen/logrus"
 
 // InitiateLogger - Initiate local logger object
-func (fenixExecutionWorkerGrpcObject *FenixExecutionWorkerGrpcObjectStruct) InitiateLogger(logger *logrus.Logger) {
+func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitiateLogger(logger *logrus.Logger) {
 
-	fenixExecutionWorkerGrpcObject.logger = logger
+	fenixExecutionConnectorGrpcObject.logger = logger
 }
 
-// InitiateLocalObject - Initiate local 'ExecutionWorkerGrpcObject'
-func (fenixExecutionWorkerGrpcObject *FenixExecutionWorkerGrpcObjectStruct) InitiateLocalObject(inFenixExecutionWorkerGrpcObject *FenixExecutionWorkerGrpcObjectStruct) {
+// InitiateLocalObject - Initiate local 'ExecutionConnectorGrpcObject'
+func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitiateLocalObject(inFenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) {
 
-	fenixExecutionWorkerGrpcObject.ExecutionWorkerGrpcObject = inFenixExecutionWorkerGrpcObject
+	fenixExecutionConnectorGrpcObject.ExecutionConnectorGrpcObject = inFenixExecutionConnectorGrpcObject
 }

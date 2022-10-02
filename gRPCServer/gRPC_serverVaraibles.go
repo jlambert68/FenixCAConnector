@@ -1,39 +1,39 @@
 package gRPCServer
 
 import (
-	"FenixExecutionWorker/workerEngine"
+	"FenixExecutionWorker/connectorEngine"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 )
 
-type FenixExecutionWorkerGrpcObjectStruct struct {
-	logger                    *logrus.Logger
-	ExecutionWorkerGrpcObject *FenixExecutionWorkerGrpcObjectStruct
+type FenixExecutionConnectorGrpcObjectStruct struct {
+	logger                       *logrus.Logger
+	ExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
 }
 
 // Variable holding everything together
-//var ExecutionWorkerGrpcObject *FenixExecutionWorkerGrpcObjectStruct
+//var ExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
 
 // gRPCServer variables
 var (
-	fenixExecutionWorkerGrpcServer                          *grpc.Server
-	registerFenixExecutionWorkerGrpcServicesServer          *grpc.Server
-	registerFenixExecutionWorkerConnectorGrpcServicesServer *grpc.Server
+	fenixExecutionConnectorGrpcServer                       *grpc.Server
+	registerFenixExecutionConnectorGrpcServicesServer       *grpc.Server
+	registerFenixExecutionConnectorWorkerGrpcServicesServer *grpc.Server
 	lis                                                     net.Listener
 )
 
 // gRPCServer Server used for register clients Name, Ip and Por and Clients Test Enviroments and Clients Test Commandst
-type fenixExecutionWorkerGrpcServicesServer struct {
+type fenixExecutionConnectorGrpcServicesServer struct {
 	logger                  *logrus.Logger
-	CommandChannelReference *workerEngine.ExecutionEngineChannelType
+	CommandChannelReference *connectorEngine.ExecutionEngineChannelType
 	fenixExecutionWorkerGrpcApi.UnimplementedFenixExecutionWorkerGrpcServicesServer
 }
 
 // gRPCServer Server used for register clients Name, Ip and Por and Clients Test Enviroments and Clients Test Commandst
-type fenixExecutionWorkerConnectorGrpcServicesServer struct {
+type fenixExecutionConnectorWorkerGrpcServicesServer struct {
 	logger                  *logrus.Logger
-	CommandChannelReference *workerEngine.ExecutionEngineChannelType
+	CommandChannelReference *connectorEngine.ExecutionEngineChannelType
 	fenixExecutionWorkerGrpcApi.UnimplementedFenixExecutionWorkerConnectorGrpcServicesServer
 }

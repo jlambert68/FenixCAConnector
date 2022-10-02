@@ -1,4 +1,4 @@
-package workerEngine
+package connectorEngine
 
 import (
 	"fmt"
@@ -65,7 +65,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) SendReportCompleteT
 
 	// Send the result using a go-routine to be able to process next command on command-queue
 	go func() {
-		sendResult, errorMessage := executionEngine.messagesToExecutionServerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessageToExecutionServer)
+		sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessageToExecutionServer)
 
 		if sendResult == false {
 			executionEngine.logger.WithFields(logrus.Fields{

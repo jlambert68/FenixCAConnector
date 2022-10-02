@@ -9,7 +9,7 @@ import (
 
 // ReportProcessingCapability
 // Ask Client to inform Execution Server of Clients capability to execute requests in parallell, serial or no processing at all
-func (s *fenixExecutionWorkerGrpcServicesServer) ReportProcessingCapability(ctx context.Context, emptyParameter *fenixExecutionWorkerGrpcApi.EmptyParameter) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
+func (s *fenixExecutionConnectorGrpcServicesServer) ReportProcessingCapability(ctx context.Context, emptyParameter *fenixExecutionWorkerGrpcApi.EmptyParameter) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "37bc2356-33a2-4e2c-9420-122df581d757",

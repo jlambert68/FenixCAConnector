@@ -1,4 +1,4 @@
-package workerEngine
+package connectorEngine
 
 import "github.com/sirupsen/logrus"
 

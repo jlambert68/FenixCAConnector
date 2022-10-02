@@ -22,7 +22,7 @@ func mustGetenv(k string) string {
 
 func main() {
 	//time.Sleep(15 * time.Second)
-	fenixExecutionWorkerMain()
+	fenixExecutionConnectorMain()
 }
 
 func init() {

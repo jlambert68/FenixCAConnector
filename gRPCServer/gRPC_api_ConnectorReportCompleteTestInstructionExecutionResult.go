@@ -2,7 +2,7 @@ package gRPCServer
 
 import (
 	"FenixExecutionWorker/common_config"
-	"FenixExecutionWorker/workerEngine"
+	"FenixExecutionWorker/connectorEngine"
 	"context"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
@@ -10,7 +10,7 @@ import (
 
 // ConnectorReportCompleteTestInstructionExecutionResult
 // When a TestInstruction has been fully executed the Execution Connector use this to inform the results of the execution result to the Worker
-func (s *fenixExecutionWorkerConnectorGrpcServicesServer) ConnectorReportCompleteTestInstructionExecutionResult(ctx context.Context, finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage) (ackNackResponse *fenixExecutionWorkerGrpcApi.AckNackResponse, err error) {
+func (s *fenixExecutionConnectorWorkerGrpcServicesServer) ConnectorReportCompleteTestInstructionExecutionResult(ctx context.Context, finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage) (ackNackResponse *fenixExecutionWorkerGrpcApi.AckNackResponse, err error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "d85d5be5-33e8-4b8e-9577-50e4b84df389",
@@ -31,9 +31,9 @@ func (s *fenixExecutionWorkerConnectorGrpcServicesServer) ConnectorReportComplet
 	}
 
 	// Send Message on CommandChannel to be able to send Result back to Fenix Execution Server
-	channelCommand := workerEngine.ChannelCommandStruct{
-		ChannelCommand: workerEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServer,
-		ReportCompleteTestInstructionExecutionResultParameter: workerEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
+	channelCommand := connectorEngine.ChannelCommandStruct{
+		ChannelCommand: connectorEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServer,
+		ReportCompleteTestInstructionExecutionResultParameter: connectorEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
 			FinalTestInstructionExecutionResultMessage: finalTestInstructionExecutionResultMessage},
 	}
 

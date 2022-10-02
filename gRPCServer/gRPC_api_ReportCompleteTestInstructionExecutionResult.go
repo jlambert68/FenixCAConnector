@@ -9,7 +9,7 @@ import (
 
 // ReportCompleteTestInstructionExecutionResult
 // Execution Server ask Worker (client) to report the final results of the execution result to the Server
-func (s *fenixExecutionWorkerGrpcServicesServer) ReportCompleteTestInstructionExecutionResult(ctx context.Context, testInstructionExecutionRequestMessage *fenixExecutionWorkerGrpcApi.TestInstructionExecutionRequestMessage) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
+func (s *fenixExecutionConnectorGrpcServicesServer) ReportCompleteTestInstructionExecutionResult(ctx context.Context, testInstructionExecutionRequestMessage *fenixExecutionWorkerGrpcApi.TestInstructionExecutionRequestMessage) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "b5fcd623-b81e-41b3-ad20-d89351dc0235",

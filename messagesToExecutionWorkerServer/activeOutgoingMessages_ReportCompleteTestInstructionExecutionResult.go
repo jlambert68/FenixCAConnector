@@ -1,4 +1,4 @@
-package messagesToExecutionServer
+package messagesToExecutionWorkerServer
 
 import (
 	"FenixExecutionWorker/common_config"
@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// SendAreYouAliveToFenixExecutionServer - Ask Fenix Execution Server to check if it's up and running
-func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SendAreYouAliveToFenixExecutionServer() (bool, string) {
+// SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer - When a TestInstruction has been fully executed the Client use this to inform the results of the execution result to the Server
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessage *fenixExecutionServerGrpcApi.FinalTestInstructionExecutionResultMessage) (bool, string) {
 
 	var ctx context.Context
 	var returnMessageAckNack bool
@@ -21,19 +21,13 @@ func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SendAre
 		return false, err.Error()
 	}
 
-	// Create the message with all test data to be sent to Fenix
-	emptyParameter := &fenixExecutionServerGrpcApi.EmptyParameter{
-
-		ProtoFileVersionUsedByClient: fenixExecutionServerGrpcApi.CurrentFenixExecutionServerProtoFileVersionEnum(common_config.GetHighestFenixExecutionServerProtoFileVersion()),
-	}
-
 	// Do gRPC-call
 	//ctx := context.Background()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer func() {
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
-			"ID": "c5ba19bd-75ff-4366-818d-745d4d7f1a52",
-		}).Error("Running Defer Cancel function")
+			"ID": "5f02b94f-b07d-4bd7-9607-89cf712824c9",
+		}).Debug("Running Defer Cancel function")
 		cancel()
 	}()
 
@@ -48,23 +42,23 @@ func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SendAre
 
 	}
 
-	returnMessage, err := fenixExecutionServerGrpcClient.AreYouAlive(ctx, emptyParameter)
+	returnMessage, err := fenixExecutionServerGrpcClient.ReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
 
 	// Shouldn't happen
 	if err != nil {
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
-			"ID":    "818aaf0b-4112-4be4-97b9-21cc084c7b8b",
+			"ID":    "ebe601e0-14b9-42c5-8f8f-960acec80433",
 			"error": err,
-		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendAreYouAliveToFenixExecutionServer'")
+		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer'")
 
 		return false, err.Error()
 
 	} else if returnMessage.AckNack == false {
 		// FenixTestDataSyncServer couldn't handle gPRC call
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
-			"ID":                                  "2ecbc800-2fb6-4e88-858d-a421b61c5529",
+			"ID":                                  "e72c61f0-feb4-41d2-a10c-5989bca92cc2",
 			"Message from Fenix Execution Server": returnMessage.Comments,
-		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendAreYouAliveToFenixExecutionServer'")
+		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer'")
 
 		return false, err.Error()
 	}

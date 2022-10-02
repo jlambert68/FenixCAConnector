@@ -9,7 +9,7 @@ import (
 
 // SendAllLogPostForExecution
 // Execution Server ask Worker (client) to report all log posts of the execution result to the Server
-func (s *fenixExecutionWorkerGrpcServicesServer) SendAllLogPostForExecution(ctx context.Context, testInstructionExecutionRequestMessage *fenixExecutionWorkerGrpcApi.TestInstructionExecutionRequestMessage) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
+func (s *fenixExecutionConnectorGrpcServicesServer) SendAllLogPostForExecution(ctx context.Context, testInstructionExecutionRequestMessage *fenixExecutionWorkerGrpcApi.TestInstructionExecutionRequestMessage) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "7c98ab59-eb2a-4cfb-83da-668ca8c1e5c2",

@@ -9,7 +9,7 @@ import (
 
 // AreYouAlive - *********************************************************************
 //Anyone can check if Fenix Execution Worker server is alive with this service
-func (s *fenixExecutionWorkerGrpcServicesServer) AreYouAlive(ctx context.Context, emptyParameter *fenixExecutionWorkerGrpcApi.EmptyParameter) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
+func (s *fenixExecutionConnectorGrpcServicesServer) AreYouAlive(ctx context.Context, emptyParameter *fenixExecutionWorkerGrpcApi.EmptyParameter) (*fenixExecutionWorkerGrpcApi.AckNackResponse, error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "1ff67695-9a8b-4821-811d-0ab8d33c4d8b",

@@ -1,4 +1,4 @@
-package messagesToExecutionServer
+package messagesToExecutionWorkerServer
 
 import (
 	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type MessagesToExecutionServerObjectStruct struct {
+type MessagesToExecutionWorkerObjectStruct struct {
 	logger         *logrus.Logger
 	gcpAccessToken *oauth2.Token
 }

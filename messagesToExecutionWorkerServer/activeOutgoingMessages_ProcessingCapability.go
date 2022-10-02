@@ -1,4 +1,4 @@
-package messagesToExecutionServer
+package messagesToExecutionWorkerServer
 
 import (
 	"FenixExecutionWorker/common_config"
@@ -9,7 +9,7 @@ import (
 )
 
 // SendReportProcessingCapabilityToFenixExecutionServer - Worker send the execution capabilities regrading parallell executions
-func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SendReportProcessingCapabilityToFenixExecutionServer(processingCapabilityMessage *fenixExecutionServerGrpcApi.ProcessingCapabilityMessage) (bool, string) {
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportProcessingCapabilityToFenixExecutionServer(processingCapabilityMessage *fenixExecutionServerGrpcApi.ProcessingCapabilityMessage) (bool, string) {
 
 	var ctx context.Context
 	var returnMessageAckNack bool

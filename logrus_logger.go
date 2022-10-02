@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (fenixExecutionWorkerObject *fenixExecutionWorkerObjectStruct) InitLogger(filename string) {
+func (fenixExecutionWorkerObject *fenixExecutionConnectorObjectStruct) InitLogger(filename string) {
 	fenixExecutionWorkerObject.logger = logrus.StandardLogger()
 
 	switch common_config.LoggingLevel {

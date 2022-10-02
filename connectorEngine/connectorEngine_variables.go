@@ -1,7 +1,7 @@
-package workerEngine
+package connectorEngine
 
 import (
-	"FenixExecutionWorker/messagesToExecutionServer"
+	"FenixExecutionWorker/messagesToExecutionWorkerServer"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 )
@@ -9,7 +9,7 @@ import (
 type TestInstructionExecutionEngineStruct struct {
 	logger                                   *logrus.Logger
 	CommandChannelReference                  *ExecutionEngineChannelType
-	messagesToExecutionServerObjectReference *messagesToExecutionServer.MessagesToExecutionServerObjectStruct
+	messagesToExecutionWorkerObjectReference *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
 }
 
 // ExecutionEngineCommandChannel

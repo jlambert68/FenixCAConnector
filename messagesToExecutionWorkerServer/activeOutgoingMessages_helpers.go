@@ -1,4 +1,4 @@
-package messagesToExecutionServer
+package messagesToExecutionWorkerServer
 
 import (
 	"FenixExecutionWorker/common_config"
@@ -18,7 +18,7 @@ import (
 // ********************************************************************************************************************
 
 // SetConnectionToFenixTestExecutionServer - Set upp connection and Dial to FenixExecutionServer
-func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SetConnectionToFenixTestExecutionServer() (err error) {
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnectionToFenixTestExecutionServer() (err error) {
 
 	var opts []grpc.DialOption
 
@@ -65,7 +65,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) SetConn
 }
 
 // Generate Google access token. Used when running in GCP
-func (fenixExecutionWorkerObject *MessagesToExecutionServerObjectStruct) generateGCPAccessToken(ctx context.Context) (appendedCtx context.Context, returnAckNack bool, returnMessage string) {
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) generateGCPAccessToken(ctx context.Context) (appendedCtx context.Context, returnAckNack bool, returnMessage string) {
 
 	// Only create the token if there is none, or it has expired
 	if fenixExecutionWorkerObject.gcpAccessToken == nil || fenixExecutionWorkerObject.gcpAccessToken.Expiry.Before(time.Now()) {
