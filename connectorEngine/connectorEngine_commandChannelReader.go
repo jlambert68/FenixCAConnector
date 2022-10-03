@@ -1,6 +1,7 @@
 package connectorEngine
 
 import (
+	"FenixCAConnector/common_config"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -25,7 +26,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 
 		// No other command is supported
 		default:
-			executionEngine.logger.WithFields(logrus.Fields{
+			common_config.Logger.WithFields(logrus.Fields{
 				"Id":                     "6bf37452-da99-4e7e-aa6a-4627b05d1bdb",
 				"incomingChannelCommand": incomingChannelCommand,
 			}).Fatalln("Unknown command in CommandChannel for Worker Engine")

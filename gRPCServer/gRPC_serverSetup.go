@@ -2,7 +2,6 @@ package gRPCServer
 
 import (
 	"FenixCAConnector/common_config"
-	"FenixCAConnector/connectorEngine"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -12,7 +11,7 @@ import (
 )
 
 // InitGrpcServer - Set up and start Backend gRPCServer-server
-func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitGrpcServer(logger *logrus.Logger, commandChannelReference *connectorEngine.ExecutionEngineChannelType) {
+func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitGrpcServer(logger *logrus.Logger) {
 
 	var err error
 

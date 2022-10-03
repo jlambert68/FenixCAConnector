@@ -27,7 +27,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	//ctx := context.Background()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer func() {
-		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		common_config.Logger.WithFields(logrus.Fields{
 			"ID": "5f02b94f-b07d-4bd7-9607-89cf712824c9",
 		}).Debug("Running Defer Cancel function")
 		cancel()
@@ -73,7 +73,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				return
 			}
 			if err != nil {
-				toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+				common_config.Logger.WithFields(logrus.Fields{
 					"ID":  "3439f49f-d7d5-477e-9a6b-cfa5ed355bfe",
 					"err": err,
 				}).Debug("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 minutes")
@@ -83,7 +83,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 
 			}
 
-			toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+			common_config.Logger.WithFields(logrus.Fields{
 				"ID": "d1ea4370-3e8e-4d2b-9626-a193213e091a",
 				"processTestInstructionExecutionReveredRequest": processTestInstructionExecutionReveredRequest,
 			}).Debug("Receive TestInstructionExecution from Worker")
@@ -96,7 +96,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 
 	// Server stopped sending so reconnect again in 5 minutes
 	<-done
-	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+	common_config.Logger.WithFields(logrus.Fields{
 		"ID": "0b5fdb7c-91aa-4dfc-b587-7b6cef83d224",
 	}).Debug("Server stopped sending so reconnect again in 5 minutes")
 
