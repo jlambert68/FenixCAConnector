@@ -2,6 +2,7 @@ package gRPCServer
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/connectorEngine"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -11,7 +12,7 @@ import (
 )
 
 // InitGrpcServer - Set up and start Backend gRPCServer-server
-func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitGrpcServer(logger *logrus.Logger) {
+func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitGrpcServer(logger *logrus.Logger, commandChannelReference *connectorEngine.ExecutionEngineChannelType) {
 
 	var err error
 
@@ -41,7 +42,13 @@ func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
 
 	// Create server and register the gRPC-service to the server
 	fenixExecutionConnectorGrpcServer = grpc.NewServer()
-	fenixExecutionConnectorGrpcApi.RegisterFenixExecutionConnectorGrpcServicesServer(fenixExecutionConnectorGrpcServer, &fenixExecutionConnectorGrpcServicesServer{logger: logger})
+	fenixExecutionConnectorGrpcApi.RegisterFenixExecutionConnectorGrpcServicesServer(fenixExecutionConnectorGrpcServer, &fenixExecutionConnectorGrpcServicesServer{})
+	/*
+	   logger:                  logger,
+	   	CommandChannelReference: commandChannelReference}
+
+
+	*/
 
 	// Register Reflection on the same server to be able for calling agents to see the methods that are offered
 	reflection.Register(fenixExecutionConnectorGrpcServer)

@@ -10,7 +10,7 @@ import (
 
 // TriggerReportProcessingCapability
 // Trigger Connector to inform Execution Worker of Clients capability to execute requests in parallell, serial or no processing at all(right now)
-func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportProcessingCapability(ctx context.Context, triggerTestInstructionExecutionResultMessage *fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage) (ackNackResponse *fenixExecutionConnectorGrpcApi.AckNackResponse, err error) {
+func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportProcessingCapability(ctx context.Context, emptyParameter *fenixExecutionConnectorGrpcApi.EmptyParameter) (ackNackResponse *fenixExecutionConnectorGrpcApi.AckNackResponse, err error) {
 
 	s.logger.WithFields(logrus.Fields{
 		"id": "d85d5be5-33e8-4b8e-9577-50e4b84df389",
@@ -24,7 +24,7 @@ func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportProcessingCapab
 	userId := "External Trigger"
 
 	// Check if Client is using correct proto files version
-	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userId, triggerTestInstructionExecutionResultMessage.ProtoFileVersionUsedByCaller)
+	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userId, emptyParameter.ProtoFileVersionUsedByCaller)
 	if returnMessage != nil {
 
 		return returnMessage, nil
@@ -34,7 +34,7 @@ func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportProcessingCapab
 	channelCommand := connectorEngine.ChannelCommandStruct{
 		ChannelCommand: connectorEngine.ChannelCommandTriggerReportProcessingCapability,
 		ReportCompleteTestInstructionExecutionResultParameter: connectorEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
-			TriggerTestInstructionExecutionResultMessage: triggerTestInstructionExecutionResultMessage},
+			TriggerTestInstructionExecutionResultMessage: &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}},
 	}
 
 	*s.CommandChannelReference <- channelCommand

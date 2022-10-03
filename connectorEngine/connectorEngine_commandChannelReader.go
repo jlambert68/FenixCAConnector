@@ -46,7 +46,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(waitTimeInSeconds int) {
 
 	// Only trigger time of there is none ongoing
-	if executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute == true {
+	if executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute == true {
 		return
 	}
 
@@ -54,7 +54,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 	go func() {
 
 		// Set that there is an ongoing timer
-		executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute = true
+		executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = true
 
 		// Wait x minutes/second before triggering
 		sleepDuration := time.Duration(waitTimeInSeconds) * time.Second
@@ -63,7 +63,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 		// Call Worker to get TestInstructions to Execute
 		executionEngine.messagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
 
-		executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute = false
+		executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = false
 
 		// Create Message for CommandChannel to retry to connect in 5 minutes
 		triggerTestInstructionExecutionResultMessage := &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}

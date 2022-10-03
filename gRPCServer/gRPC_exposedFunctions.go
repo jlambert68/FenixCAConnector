@@ -1,11 +1,16 @@
 package gRPCServer
 
-import "github.com/sirupsen/logrus"
+import (
+	"FenixCAConnector/connectorEngine"
+	"github.com/sirupsen/logrus"
+)
 
-// InitiateLogger - Initiate local logger object
-func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitiateLogger(logger *logrus.Logger) {
+// InitiategRPCObject - Initiate local logger object
+func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct) InitiategRPCObject(logger *logrus.Logger, commandChannelReference *connectorEngine.ExecutionEngineChannelType) {
 
 	fenixExecutionConnectorGrpcObject.logger = logger
+	fenixExecutionConnectorGrpcObject.CommandChannelReference = commandChannelReference
+
 }
 
 // InitiateLocalObject - Initiate local 'ExecutionConnectorGrpcObject'

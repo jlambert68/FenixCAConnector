@@ -58,7 +58,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 		}).Info("gRPC connection OK to FenixExecutionServer")
 
 		// Creates a new Clients
-		fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
+		fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerConnectorGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
 
 	}
 	return err

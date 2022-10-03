@@ -1,7 +1,7 @@
 package main
 
 import (
-	"FenixExecutionWorker/common_config"
+	"FenixCAConnector/common_config"
 	"strconv"
 
 	//"flag"

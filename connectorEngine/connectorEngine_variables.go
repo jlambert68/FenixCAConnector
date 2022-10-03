@@ -10,10 +10,10 @@ type TestInstructionExecutionEngineStruct struct {
 	logger                                                               *logrus.Logger
 	CommandChannelReference                                              *ExecutionEngineChannelType
 	messagesToExecutionWorkerObjectReference                             *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
-	ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute bool
+	ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute bool
 }
 
-// ExecutionEngineCommandChannel
+// ExecutionEngineCommandChannel, which is references by all parts of the Connector
 var ExecutionEngineCommandChannel ExecutionEngineChannelType
 
 type ExecutionEngineChannelType chan ChannelCommandStruct

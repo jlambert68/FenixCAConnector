@@ -48,7 +48,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 
 	}
 
-	returnMessage, err := fenixExecutionWorkerGrpcClient.AreYouAlive(ctx, emptyParameter)
+	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorAreYouAlive(ctx, emptyParameter)
 
 	// Shouldn't happen
 	if err != nil {
