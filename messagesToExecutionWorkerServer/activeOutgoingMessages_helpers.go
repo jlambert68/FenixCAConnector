@@ -17,8 +17,8 @@ import (
 
 // ********************************************************************************************************************
 
-// SetConnectionToFenixTestExecutionServer - Set upp connection and Dial to FenixExecutionServer
-func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnectionToFenixTestExecutionServer() (err error) {
+// SetConnectionToFenixExecutionWorkerServer - Set upp connection and Dial to FenixExecutionServer
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnectionToFenixExecutionWorkerServer() (err error) {
 
 	var opts []grpc.DialOption
 

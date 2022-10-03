@@ -2,8 +2,6 @@ package connectorEngine
 
 import (
 	"fmt"
-	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
-	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,9 +15,6 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 		incomingChannelCommand = <-*executionEngine.CommandChannelReference
 
 		switch incomingChannelCommand.ChannelCommand {
-
-		case ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServer:
-			executionEngine.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(incomingChannelCommand)
 
 		// No other command is supported
 		default:
@@ -47,33 +42,36 @@ func (executionEngine *TestInstructionExecutionEngineStruct) checkOngoingExecuti
 // SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer
 // Forward the final result of a TestInstructionExecution done by domains own execution engine
 func (executionEngine *TestInstructionExecutionEngineStruct) SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(channelCommand ChannelCommandStruct) {
-	var finalTestInstructionExecutionResultMessageFromExecutionWorker *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
-	var finalTestInstructionExecutionResultMessageToExecutionServer *fenixExecutionServerGrpcApi.FinalTestInstructionExecutionResultMessage
+	/*
+		var finalTestInstructionExecutionResultMessageFromExecutionWorker *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
+		var finalTestInstructionExecutionResultMessageToExecutionServer *fenixExecutionServerGrpcApi.FinalTestInstructionExecutionResultMessage
 
-	// Convert message into Worker-message-structure-type
-	finalTestInstructionExecutionResultMessageFromExecutionWorker = channelCommand.ReportCompleteTestInstructionExecutionResultParameter.FinalTestInstructionExecutionResultMessage
+		// Convert message into Worker-message-structure-type
+		finalTestInstructionExecutionResultMessageFromExecutionWorker = channelCommand.ReportCompleteTestInstructionExecutionResultParameter.TriggerTestInstructionExecutionResultMessage
 
-	// Convert from Worker-message into ExecutionServer-message
-	finalTestInstructionExecutionResultMessageToExecutionServer = &fenixExecutionServerGrpcApi.FinalTestInstructionExecutionResultMessage{
-		ClientSystemIdentification: &fenixExecutionServerGrpcApi.ClientSystemIdentificationMessage{
-			DomainUuid:                   finalTestInstructionExecutionResultMessageFromExecutionWorker.ClientSystemIdentification.DomainUuid,
-			ProtoFileVersionUsedByClient: fenixExecutionServerGrpcApi.CurrentFenixExecutionServerProtoFileVersionEnum(finalTestInstructionExecutionResultMessageFromExecutionWorker.ClientSystemIdentification.ProtoFileVersionUsedByClient),
-		},
-		TestInstructionExecutionUuid:   finalTestInstructionExecutionResultMessageFromExecutionWorker.TestInstructionExecutionUuid,
-		TestInstructionExecutionStatus: fenixExecutionServerGrpcApi.TestInstructionExecutionStatusEnum(finalTestInstructionExecutionResultMessageFromExecutionWorker.TestInstructionExecutionStatus),
-	}
-
-	// Send the result using a go-routine to be able to process next command on command-queue
-	go func() {
-		sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessageToExecutionServer)
-
-		if sendResult == false {
-			executionEngine.logger.WithFields(logrus.Fields{
-				"id":             "e9aae7c6-8a14-4da2-8001-2029d5bbac8d",
-				"errorMessage":   errorMessage,
-				"channelCommand": channelCommand,
-			}).Error("Couldn't do gRPC-call to Execution Server ('SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer')")
+		// Convert from Worker-message into ExecutionServer-message
+		finalTestInstructionExecutionResultMessageToExecutionServer = &fenixExecutionServerGrpcApi.FinalTestInstructionExecutionResultMessage{
+			ClientSystemIdentification: &fenixExecutionServerGrpcApi.ClientSystemIdentificationMessage{
+				DomainUuid:                   finalTestInstructionExecutionResultMessageFromExecutionWorker.ClientSystemIdentification.DomainUuid,
+				ProtoFileVersionUsedByClient: fenixExecutionServerGrpcApi.CurrentFenixExecutionServerProtoFileVersionEnum(finalTestInstructionExecutionResultMessageFromExecutionWorker.ClientSystemIdentification.ProtoFileVersionUsedByClient),
+			},
+			TestInstructionExecutionUuid:   finalTestInstructionExecutionResultMessageFromExecutionWorker.TestInstructionExecutionUuid,
+			TestInstructionExecutionStatus: fenixExecutionServerGrpcApi.TestInstructionExecutionStatusEnum(finalTestInstructionExecutionResultMessageFromExecutionWorker.TestInstructionExecutionStatus),
 		}
-	}()
 
+		// Send the result using a go-routine to be able to process next command on command-queue
+		go func() {
+			sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessageToExecutionServer)
+
+			if sendResult == false {
+				executionEngine.logger.WithFields(logrus.Fields{
+					"id":             "e9aae7c6-8a14-4da2-8001-2029d5bbac8d",
+					"errorMessage":   errorMessage,
+					"channelCommand": channelCommand,
+				}).Error("Couldn't do gRPC-call to Execution Server ('SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer')")
+			}
+		}()
+
+
+	*/
 }

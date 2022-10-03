@@ -16,7 +16,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendRep
 	var returnMessageString string
 
 	// Set up connection to Server
-	err := fenixExecutionWorkerObject.SetConnectionToFenixTestExecutionServer()
+	err := fenixExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer()
 	if err != nil {
 		return false, err.Error()
 	}

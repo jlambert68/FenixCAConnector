@@ -15,10 +15,10 @@ type FenixExecutionConnectorGrpcObjectStruct struct {
 
 // gRPCServer variables
 var (
-	fenixExecutionConnectorGrpcServer                       *grpc.Server
-	registerFenixExecutionConnectorGrpcServicesServer       *grpc.Server
-	registerFenixExecutionConnectorWorkerGrpcServicesServer *grpc.Server
-	lis                                                     net.Listener
+	fenixExecutionConnectorGrpcServer *grpc.Server
+	//registerFenixExecutionConnectorGrpcServicesServer       *grpc.Server
+	//registerFenixExecutionConnectorWorkerGrpcServicesServer *grpc.Server
+	lis net.Listener
 )
 
 // gRPCServer Server type

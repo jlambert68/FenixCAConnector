@@ -1,8 +1,8 @@
 package connectorEngine
 
 import (
-	"FenixExecutionWorker/messagesToExecutionWorkerServer"
-	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
+	"FenixCAConnector/messagesToExecutionWorkerServer"
+	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,9 +20,12 @@ type ExecutionEngineChannelType chan ChannelCommandStruct
 type ChannelCommandType uint8
 
 const (
-	ChannelCommandSendAreYouAliveToFenixExecutionServer ChannelCommandType = iota
-	ChannelCommandSendReportProcessingCapabilityToFenixExecutionServer
-	ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServer
+	ChannelCommandSendAreYouAliveToFenixWorkerServer ChannelCommandType = iota
+	ChannelCommandTriggerReportProcessingCapability
+	ChannelCommandTriggerReportCompleteTestInstructionExecutionResult
+	ChannelCommandTriggerReportCurrentTestInstructionExecutionResult
+	ChannelCommandTriggerSendAllLogPostForExecution
+	ChannelCommandTriggerRequestForTestInstructionExecutionToProcess
 )
 
 type ChannelCommandStruct struct {
@@ -33,5 +36,5 @@ type ChannelCommandStruct struct {
 // ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct
 // Parameter used when to forward the final execution result for a TestInstruction
 type ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct struct {
-	FinalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
+	TriggerTestInstructionExecutionResultMessage *fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage
 }

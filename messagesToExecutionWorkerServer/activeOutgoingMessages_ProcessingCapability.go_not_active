@@ -1,22 +1,22 @@
 package messagesToExecutionWorkerServer
 
 import (
-	"FenixExecutionWorker/common_config"
+	"FenixCAConnector/common_config"
 	"context"
-	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
 // SendReportProcessingCapabilityToFenixExecutionServer - Worker send the execution capabilities regrading parallell executions
-func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportProcessingCapabilityToFenixExecutionServer(processingCapabilityMessage *fenixExecutionServerGrpcApi.ProcessingCapabilityMessage) (bool, string) {
+func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportProcessingCapabilityToFenixWorkerServer(processingCapabilityMessage *fenixExecutionWorkerGrpcApi.Pr) (bool, string) {
 
 	var ctx context.Context
 	var returnMessageAckNack bool
 	var returnMessageString string
 
 	// Set up connection to Server
-	err := fenixExecutionWorkerObject.SetConnectionToFenixTestExecutionServer()
+	err := fenixExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer()
 	if err != nil {
 		return false, err.Error()
 	}

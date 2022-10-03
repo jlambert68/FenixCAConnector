@@ -1,7 +1,7 @@
 package main
 
 import (
-	"FenixExecutionWorker/gRPCServer"
+	"FenixCAConnector/gRPCServer"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,4 +11,4 @@ type fenixExecutionConnectorObjectStruct struct {
 }
 
 // Variable holding everything together
-var FenixExecutionConnectorObject *fenixExecutionConnectorObjectStruct
+var fenixExecutionConnectorObject *fenixExecutionConnectorObjectStruct

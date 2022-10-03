@@ -16,7 +16,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAre
 	var returnMessageString string
 
 	// Set up connection to Server
-	err := fenixExecutionWorkerObject.SetConnectionToFenixTestExecutionServer()
+	err := fenixExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer()
 	if err != nil {
 		return false, err.Error()
 	}
@@ -33,7 +33,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAre
 	defer func() {
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
 			"ID": "c5ba19bd-75ff-4366-818d-745d4d7f1a52",
-		}).Error("Running Defer Cancel function")
+		}).Debug("Running Defer Cancel function")
 		cancel()
 	}()
 
