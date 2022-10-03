@@ -1,8 +1,9 @@
 package connectorEngine
 
 import (
-	"fmt"
+	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 // Channel reader which is used for reading out commands to CommandEngine
@@ -16,6 +17,12 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 
 		switch incomingChannelCommand.ChannelCommand {
 
+		case ChannelCommandTriggerRequestForTestInstructionExecutionToProcess:
+			executionEngine.initiateConnectorRequestForProcessTestInstructionExecution()
+
+		case ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Minutes:
+			executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(5 * 60)
+
 		// No other command is supported
 		default:
 			executionEngine.logger.WithFields(logrus.Fields{
@@ -27,10 +34,49 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 
 }
 
-// Check ExecutionQueue for TestInstructions and move them to ongoing Executions-table
-func (executionEngine *TestInstructionExecutionEngineStruct) initiateExecutionsForTestInstructionsOnExecutionQueue() {
+// Call Worker to get TestInstructions to Execute, which is done as a message stream in the response from the Worker
+func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRequestForProcessTestInstructionExecution() {
 
-	fmt.Println("initiateExecutionsForTestInstructionsOnExecutionQueue")
+	// Call RequestForProcessTestInstructionExecution with parameter set to zero sleep before do the gPRC-call
+	executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(0)
+
+}
+
+// Call Worker in X seconds, due to some connection error, to get TestInstructions to Execute, which is done as a message stream in the response from the Worker
+func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(waitTimeInSeconds int) {
+
+	// Only trigger time of there is none ongoing
+	if executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute == true {
+		return
+	}
+
+	// Run it as a go-routine
+	go func() {
+
+		// Set that there is an ongoing timer
+		executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute = true
+
+		// Wait x minutes/second before triggering
+		sleepDuration := time.Duration(waitTimeInSeconds) * time.Second
+		time.Sleep(sleepDuration)
+
+		// Call Worker to get TestInstructions to Execute
+		executionEngine.messagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
+
+		executionEngine.ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute = false
+
+		// Create Message for CommandChannel to retry to connect in 5 minutes
+		triggerTestInstructionExecutionResultMessage := &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}
+		channelCommand := ChannelCommandStruct{
+			ChannelCommand: ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Minutes,
+			ReportCompleteTestInstructionExecutionResultParameter: ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
+				TriggerTestInstructionExecutionResultMessage: triggerTestInstructionExecutionResultMessage},
+		}
+
+		// Send message on channel
+		*executionEngine.CommandChannelReference <- channelCommand
+
+	}()
 
 }
 
@@ -61,14 +107,14 @@ func (executionEngine *TestInstructionExecutionEngineStruct) SendReportCompleteT
 
 		// Send the result using a go-routine to be able to process next command on command-queue
 		go func() {
-			sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer(finalTestInstructionExecutionResultMessageToExecutionServer)
+			sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessageToExecutionServer)
 
 			if sendResult == false {
 				executionEngine.logger.WithFields(logrus.Fields{
 					"id":             "e9aae7c6-8a14-4da2-8001-2029d5bbac8d",
 					"errorMessage":   errorMessage,
 					"channelCommand": channelCommand,
-				}).Error("Couldn't do gRPC-call to Execution Server ('SendReportCompleteTestInstructionExecutionResultToFenixExecutionServer')")
+				}).Error("Couldn't do gRPC-call to Execution Server ('SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer')")
 			}
 		}()
 

@@ -7,9 +7,10 @@ import (
 )
 
 type TestInstructionExecutionEngineStruct struct {
-	logger                                   *logrus.Logger
-	CommandChannelReference                  *ExecutionEngineChannelType
-	messagesToExecutionWorkerObjectReference *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
+	logger                                                               *logrus.Logger
+	CommandChannelReference                                              *ExecutionEngineChannelType
+	messagesToExecutionWorkerObjectReference                             *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
+	ongoingTimerOrConnectionForCallingWorkerFortestInstructionsToExecute bool
 }
 
 // ExecutionEngineCommandChannel
@@ -26,6 +27,7 @@ const (
 	ChannelCommandTriggerReportCurrentTestInstructionExecutionResult
 	ChannelCommandTriggerSendAllLogPostForExecution
 	ChannelCommandTriggerRequestForTestInstructionExecutionToProcess
+	ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Minutes
 )
 
 type ChannelCommandStruct struct {
