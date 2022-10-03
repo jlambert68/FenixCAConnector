@@ -2,6 +2,8 @@ package gRPCServer
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/messagesToExecutionWorkerServer"
+	"fmt"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -19,12 +21,33 @@ func (s *fenixExecutionConnectorGrpcServicesServer) WorkerAreYouAlive(ctx contex
 		"id": "b9003ecf-b686-429b-b603-261f78e9c787",
 	}).Debug("Outgoing 'gRPCServer - ConnectorAreYouAlive'")
 
-	ackNackResponse := &fenixExecutionConnectorGrpcApi.AckNackResponse{
-		AckNack:                         true,
-		Comments:                        "I'am alive.",
-		ErrorCodes:                      nil,
+	// Current user
+	userID := "gRPC-api doesn't support UserId"
+
+	// Check if Client is using correct proto files version
+	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userID, fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(emptyParameter.ProtoFileVersionUsedByCaller))
+	if returnMessage != nil {
+
+		// Exiting
+		return returnMessage, nil
+	}
+
+	// Set up instance to use for execution gPRC
+	var fenixExecutionWorkerObject *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
+	fenixExecutionWorkerObject = &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{Logger: s.logger}
+
+	response, responseMessage := fenixExecutionWorkerObject.SendAreYouAliveToFenixExecutionServer()
+
+	// Create Error Codes
+	var errorCodes []fenixExecutionConnectorGrpcApi.ErrorCodesEnum
+
+	ackNackResponseMessage := &fenixExecutionConnectorGrpcApi.AckNackResponse{
+		AckNack:                         response,
+		Comments:                        fmt.Sprintf("The response from Worker is '%s'", responseMessage),
+		ErrorCodes:                      errorCodes,
 		ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(common_config.GetHighestConnectorProtoFileVersion()),
 	}
 
-	return ackNackResponse, nil
+	return ackNackResponseMessage, nil
+
 }

@@ -21,7 +21,8 @@ const (
 
 // Address to Fenix Execution Worker & Execution Connector, will have their values from Environment variables at startup
 var (
-	FenixExecutionWorkerAddress string
-	FenixExecutionWorkerPort    int
-	ExecutionConnectorPort      int
+	FenixExecutionWorkerAddress       string
+	FenixExecutionWorkerPort          int
+	FenixExecutionWorkerAddressToDial string
+	ExecutionConnectorPort            int
 )

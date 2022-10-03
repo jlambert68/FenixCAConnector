@@ -88,4 +88,7 @@ func init() {
 
 	}
 
+	// Build the Dial-address for gPRC-call
+	common_config.FenixExecutionWorkerAddressToDial = common_config.FenixExecutionWorkerAddress + ":" + strconv.Itoa(common_config.FenixExecutionWorkerPort)
+
 }
