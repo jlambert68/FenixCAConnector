@@ -1,7 +1,7 @@
 package messagesToExecutionWorkerServer
 
 import (
-	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
@@ -12,9 +12,9 @@ type MessagesToExecutionWorkerObjectStruct struct {
 	gcpAccessToken *oauth2.Token
 }
 
-// Variables used for contacting Fenix Execution Server
+// Variables used for contacting Fenix Execution Worker Server
 var (
-	remoteFenixExecutionServerConnection *grpc.ClientConn
-	FenixExecutionServerAddressToDial    string
-	fenixExecutionServerGrpcClient       fenixExecutionServerGrpcApi.FenixExecutionServerGrpcServicesClient
+	remoteFenixExecutionWorkerServerConnection *grpc.ClientConn
+	FenixExecutionWorkerAddressToDial          string
+	fenixExecutionWorkerGrpcClient             fenixExecutionWorkerGrpcApi.FenixExecutionWorkerGrpcServicesClient
 )

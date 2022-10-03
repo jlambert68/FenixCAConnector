@@ -1,9 +1,9 @@
 package messagesToExecutionWorkerServer
 
 import (
-	"FenixExecutionWorker/common_config"
+	"FenixCAConnector/common_config"
 	"crypto/tls"
-	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/idtoken"
 	grpcMetadata "google.golang.org/grpc/metadata"
@@ -23,7 +23,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConn
 	var opts []grpc.DialOption
 
 	//When running on GCP then use credential otherwise not
-	if common_config.ExecutionLocationForFenixExecutionServer == common_config.GCP {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
 		})
@@ -33,19 +33,19 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConn
 		}
 	}
 
-	// Set up connection to Fenix Execution Server
+	// Set up connection to Fenix Execution Worker
 	// When run on GCP, use credentials
-	if common_config.ExecutionLocationForFenixExecutionServer == common_config.GCP {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 		// Run on GCP
-		remoteFenixExecutionServerConnection, err = grpc.Dial(FenixExecutionServerAddressToDial, opts...)
+		remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(FenixExecutionWorkerAddressToDial, opts...)
 	} else {
 		// Run Local
-		remoteFenixExecutionServerConnection, err = grpc.Dial(FenixExecutionServerAddressToDial, grpc.WithInsecure())
+		remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(FenixExecutionWorkerAddressToDial, grpc.WithInsecure())
 	}
 	if err != nil {
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
 			"ID":                                "50b59b1b-57ce-4c27-aa84-617f0cde3100",
-			"FenixExecutionServerAddressToDial": FenixExecutionServerAddressToDial,
+			"FenixExecutionWorkerAddressToDial": FenixExecutionWorkerAddressToDial,
 			"error message":                     err,
 		}).Error("Did not connect to FenixExecutionServer via gRPC")
 
@@ -54,11 +54,11 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConn
 	} else {
 		fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
 			"ID":                                "0c650bbc-45d0-4029-bd25-4ced9925a059",
-			"FenixExecutionServerAddressToDial": FenixExecutionServerAddressToDial,
+			"FenixExecutionWorkerAddressToDial": FenixExecutionWorkerAddressToDial,
 		}).Info("gRPC connection OK to FenixExecutionServer")
 
 		// Creates a new Clients
-		fenixExecutionServerGrpcClient = fenixExecutionServerGrpcApi.NewFenixExecutionServerGrpcServicesClient(remoteFenixExecutionServerConnection)
+		fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
 
 	}
 	return err
@@ -73,7 +73,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) generat
 		// Create an identity token.
 		// With a global TokenSource tokens would be reused and auto-refreshed at need.
 		// A given TokenSource is specific to the audience.
-		tokenSource, err := idtoken.NewTokenSource(ctx, "https://"+common_config.FenixExecutionServerAddress)
+		tokenSource, err := idtoken.NewTokenSource(ctx, "https://"+common_config.FenixExecutionWorkerAddress)
 		if err != nil {
 			fenixExecutionWorkerObject.logger.WithFields(logrus.Fields{
 				"ID":  "8ba622d8-b4cd-46c7-9f81-d9ade2568eca",

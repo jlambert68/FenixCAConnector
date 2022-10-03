@@ -1,9 +1,9 @@
 package messagesToExecutionWorkerServer
 
 import (
-	"FenixExecutionWorker/common_config"
+	"FenixCAConnector/common_config"
 	"context"
-	fenixExecutionServerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionServerGrpcApi/go_grpc_api"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -22,9 +22,9 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAre
 	}
 
 	// Create the message with all test data to be sent to Fenix
-	emptyParameter := &fenixExecutionServerGrpcApi.EmptyParameter{
+	emptyParameter := &fenixExecutionWorkerGrpcApi.EmptyParameter{
 
-		ProtoFileVersionUsedByClient: fenixExecutionServerGrpcApi.CurrentFenixExecutionServerProtoFileVersionEnum(common_config.GetHighestFenixExecutionServerProtoFileVersion()),
+		ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
 	}
 
 	// Do gRPC-call
@@ -38,7 +38,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAre
 	}()
 
 	// Only add access token when run on GCP
-	if common_config.ExecutionLocationForFenixExecutionServer == common_config.GCP {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 
 		// Add Access token
 		ctx, returnMessageAckNack, returnMessageString = fenixExecutionWorkerObject.generateGCPAccessToken(ctx)
@@ -48,7 +48,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAre
 
 	}
 
-	returnMessage, err := fenixExecutionServerGrpcClient.AreYouAlive(ctx, emptyParameter)
+	returnMessage, err := fenixExecutionWorkerGrpcClient.AreYouAlive(ctx, emptyParameter)
 
 	// Shouldn't happen
 	if err != nil {

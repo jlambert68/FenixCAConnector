@@ -32,7 +32,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendRep
 	}()
 
 	// Only add access token when run on GCP
-	if common_config.ExecutionLocationForFenixExecutionServer == common_config.GCP {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 
 		// Add Access token
 		ctx, returnMessageAckNack, returnMessageString = fenixExecutionWorkerObject.generateGCPAccessToken(ctx)
@@ -42,7 +42,7 @@ func (fenixExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendRep
 
 	}
 
-	returnMessage, err := fenixExecutionServerGrpcClient.ReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
+	returnMessage, err := fenixExecutionWorkerGrpcClient.ReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
 
 	// Shouldn't happen
 	if err != nil {

@@ -26,56 +26,64 @@ func main() {
 }
 
 func init() {
-	//executionLocationForWorker := flag.String("startupType", "0", "The application should be started with one of the following: LOCALHOST_NODOCKER, LOCALHOST_DOCKER, GCP")
+	//executionLocationForConnector := flag.String("startupType", "0", "The application should be started with one of the following: LOCALHOST_NODOCKER, LOCALHOST_DOCKER, GCP")
 	//flag.Parse()
 
 	var err error
 
 	// Get Environment variable to tell how/were this worker is  running
-	var executionLocationForWorker = mustGetenv("ExecutionLocationForWorker")
+	var executionLocationForConnector = mustGetenv("ExecutionLocationForConnector")
 
-	switch executionLocationForWorker {
+	switch executionLocationForConnector {
 	case "LOCALHOST_NODOCKER":
-		common_config.ExecutionLocationForWorker = common_config.LocalhostNoDocker
+		common_config.ExecutionLocationForConnector = common_config.LocalhostNoDocker
 
 	case "LOCALHOST_DOCKER":
-		common_config.ExecutionLocationForWorker = common_config.LocalhostDocker
+		common_config.ExecutionLocationForConnector = common_config.LocalhostDocker
 
 	case "GCP":
-		common_config.ExecutionLocationForWorker = common_config.GCP
+		common_config.ExecutionLocationForConnector = common_config.GCP
 
 	default:
-		fmt.Println("Unknown Execution location for Worker: " + executionLocationForWorker + ". Expected one of the following: 'LOCALHOST_NODOCKER', 'LOCALHOST_DOCKER', 'GCP'")
+		fmt.Println("Unknown Execution location for Connector: " + executionLocationForConnector + ". Expected one of the following: 'LOCALHOST_NODOCKER', 'LOCALHOST_DOCKER', 'GCP'")
 		os.Exit(0)
 
 	}
 
 	// Get Environment variable to tell were Fenix Execution Server is running
-	var executionLocationForExecutionServer = mustGetenv("ExecutionLocationForFenixTestExecutionServer")
+	var executionLocationForExecutionWorker = mustGetenv("ExecutionLocationForWorker")
 
-	switch executionLocationForExecutionServer {
+	switch executionLocationForExecutionWorker {
 	case "LOCALHOST_NODOCKER":
-		common_config.ExecutionLocationForFenixExecutionServer = common_config.LocalhostNoDocker
+		common_config.ExecutionLocationForFenixExecutionWorkerServer = common_config.LocalhostNoDocker
 
 	case "LOCALHOST_DOCKER":
-		common_config.ExecutionLocationForFenixExecutionServer = common_config.LocalhostDocker
+		common_config.ExecutionLocationForFenixExecutionWorkerServer = common_config.LocalhostDocker
 
 	case "GCP":
-		common_config.ExecutionLocationForFenixExecutionServer = common_config.GCP
+		common_config.ExecutionLocationForFenixExecutionWorkerServer = common_config.GCP
 
 	default:
-		fmt.Println("Unknown Execution location for Fenix Execution Server: " + executionLocationForWorker + ". Expected one of the following: 'LOCALHOST_NODOCKER', 'LOCALHOST_DOCKER', 'GCP'")
+		fmt.Println("Unknown Execution location for Fenix Execution Worker Server: " + executionLocationForExecutionWorker + ". Expected one of the following: 'LOCALHOST_NODOCKER', 'LOCALHOST_DOCKER', 'GCP'")
 		os.Exit(0)
 
 	}
 
-	// Address to Fenix Execution Server
-	common_config.FenixExecutionServerAddress = mustGetenv("FenixExecutionServerAddress")
+	// Address to Fenix Execution Worker Server
+	common_config.FenixExecutionWorkerAddress = mustGetenv("ExecutionWorkerAddress")
 
-	// Port for Fenix Execution Server
-	common_config.FenixExecutionWorkerServerPort, err = strconv.Atoi(mustGetenv("FenixExecutionServerPort"))
+	// Port for Fenix Execution Worker Server
+	common_config.FenixExecutionWorkerPort, err = strconv.Atoi(mustGetenv("ExecutionWorkerPort"))
 	if err != nil {
-		fmt.Println("Couldn't convert environment variable 'FenixGuiBuilderServerPort' to an integer, error: ", err)
+		fmt.Println("Couldn't convert environment variable 'ExecutionWorkerPort' to an integer, error: ", err)
+		os.Exit(0)
+
+	}
+
+	// Port for Fenix Execution Connector Server
+	common_config.ExecutionConnectorPort, err = strconv.Atoi(mustGetenv("ExecutionConnectorPort"))
+	if err != nil {
+		fmt.Println("Couldn't convert environment variable 'ExecutionConnectorPort' to an integer, error: ", err)
 		os.Exit(0)
 
 	}

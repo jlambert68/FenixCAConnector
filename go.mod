@@ -1,9 +1,9 @@
-module FenixExecutionWorker
+module FenixCAConnector
 
 go 1.18
 
 require (
-	github.com/jlambert68/FenixGrpcApi v0.0.0-20220928130748-4ee75eb59e14
+	github.com/jlambert68/FenixGrpcApi v0.0.0-20221003081827-703bbc8a5ced
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
