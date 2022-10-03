@@ -9,9 +9,9 @@ import (
 )
 
 type FenixExecutionConnectorGrpcObjectStruct struct {
-	logger                       *logrus.Logger
-	ExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
-	CommandChannelReference      *connectorEngine.ExecutionEngineChannelType
+	logger *logrus.Logger
+	//ExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
+	//CommandChannelReference *connectorEngine.ExecutionEngineChannelType
 }
 
 // gRPCServer variables

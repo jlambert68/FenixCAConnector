@@ -57,6 +57,6 @@ func fenixExecutionConnectorMain() {
 	}
 
 	// Send message on channel
-	*fenixExecutionConnectorObject.CommandChannelReference <- channelCommand
+	connectorEngine.ExecutionEngineCommandChannel <- channelCommand
 
 }

@@ -42,13 +42,9 @@ func (fenixExecutionConnectorGrpcObject *FenixExecutionConnectorGrpcObjectStruct
 
 	// Create server and register the gRPC-service to the server
 	fenixExecutionConnectorGrpcServer = grpc.NewServer()
-	fenixExecutionConnectorGrpcApi.RegisterFenixExecutionConnectorGrpcServicesServer(fenixExecutionConnectorGrpcServer, &fenixExecutionConnectorGrpcServicesServer{})
-	/*
-	   logger:                  logger,
-	   	CommandChannelReference: commandChannelReference}
-
-
-	*/
+	fenixExecutionConnectorGrpcApi.RegisterFenixExecutionConnectorGrpcServicesServer(fenixExecutionConnectorGrpcServer, &fenixExecutionConnectorGrpcServicesServer{
+		logger: logger})
+	//	   	CommandChannelReference: commandChannelReference}
 
 	// Register Reflection on the same server to be able for calling agents to see the methods that are offered
 	reflection.Register(fenixExecutionConnectorGrpcServer)
