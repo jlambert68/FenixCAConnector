@@ -57,7 +57,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 			"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
 		}).Info("gRPC connection OK to FenixExecutionServer")
 
-		// Creates a new Clients
+		// Creates a new Client
 		fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerConnectorGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
 
 	}

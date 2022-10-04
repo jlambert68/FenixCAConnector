@@ -6,7 +6,6 @@ import (
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"io"
-	"time"
 )
 
 // InitiateConnectorRequestForProcessTestInstructionExecution
@@ -25,7 +24,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 
 	// Do gRPC-call
 	//ctx := context.Background()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithCancel(context.Background()) //, 30*time.Second)
 	defer func() {
 		common_config.Logger.WithFields(logrus.Fields{
 			"ID": "5f02b94f-b07d-4bd7-9607-89cf712824c9",
@@ -48,15 +47,15 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	emptyParameter := &fenixExecutionWorkerGrpcApi.EmptyParameter{
 		ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion())}
 
-	// Start up stream from Worker server
-	stream, err := fenixExecutionWorkerGrpcClient.ConnectorRequestForProcessTestInstructionExecution(ctx, emptyParameter)
+	// Start up streamClient from Worker server
+	streamClient, err := fenixExecutionWorkerGrpcClient.ConnectorRequestForProcessTestInstructionExecution(ctx, emptyParameter)
 
 	// Couldn't connect to Worker
 	if err != nil {
-		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		common_config.Logger.WithFields(logrus.Fields{
 			"ID":  "d9ab0434-1121-4e2e-95e7-3e1cc99656b0",
 			"err": err,
-		}).Debug("Couldn't open stream from Worker Server. Will wait 5 minutes and try again")
+		}).Error("Couldn't open streamClient from Worker Server. Will wait 5 minutes and try again")
 
 		return
 	}
@@ -64,10 +63,10 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	// Local channel to decide when Server stopped sending
 	done := make(chan bool)
 
-	// Run stream receiver as a go-routine
+	// Run streamClient receiver as a go-routine
 	go func() {
 		for {
-			processTestInstructionExecutionReveredRequest, err := stream.Recv()
+			processTestInstructionExecutionReveredRequest, err := streamClient.Recv()
 			if err == io.EOF {
 				done <- true //close(done)
 				return
@@ -76,20 +75,32 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				common_config.Logger.WithFields(logrus.Fields{
 					"ID":  "3439f49f-d7d5-477e-9a6b-cfa5ed355bfe",
 					"err": err,
-				}).Debug("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 minutes")
+				}).Error("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 minutes")
 
 				done <- true //close(done)
 				return
 
 			}
 
-			common_config.Logger.WithFields(logrus.Fields{
-				"ID": "d1ea4370-3e8e-4d2b-9626-a193213e091a",
-				"processTestInstructionExecutionReveredRequest": processTestInstructionExecutionReveredRequest,
-			}).Debug("Receive TestInstructionExecution from Worker")
+			// Check if message counts as a "keep Alive message, message is 'nil
+			if processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionName == "KeepAlive" {
+				// Is a keep alive message
+				common_config.Logger.WithFields(logrus.Fields{
+					"ID": "08b86c8d-81ba-4664-8cb5-8e53140dc870",
+					"processTestInstructionExecutionReveredRequest": processTestInstructionExecutionReveredRequest,
+				}).Debug("'Keep alive' message received from Worker")
 
-			// Call 'CA' backend to execute TestInstruction
-			// TODO send TestInstruction over CommandChannel
+			} else {
+
+				// Is a standard TestInstruction to execute by Connector backend
+				common_config.Logger.WithFields(logrus.Fields{
+					"ID": "d1ea4370-3e8e-4d2b-9626-a193213e091a",
+					"processTestInstructionExecutionReveredRequest": processTestInstructionExecutionReveredRequest,
+				}).Debug("Receive TestInstructionExecution from Worker")
+
+				// Call 'CA' backend to execute TestInstruction
+				// TODO send TestInstruction over CommandChannel
+			}
 
 		}
 	}()

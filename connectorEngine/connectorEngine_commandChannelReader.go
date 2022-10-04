@@ -22,7 +22,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 			executionEngine.initiateConnectorRequestForProcessTestInstructionExecution()
 
 		case ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Minutes:
-			executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(5 * 60)
+			executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(1 * 60)
 
 		// No other command is supported
 		default:
