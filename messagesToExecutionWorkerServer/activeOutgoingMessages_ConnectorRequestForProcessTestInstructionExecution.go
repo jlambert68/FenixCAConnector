@@ -3,6 +3,7 @@ package messagesToExecutionWorkerServer
 import (
 	"FenixCAConnector/common_config"
 	"context"
+	"fmt"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -125,16 +126,21 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 					TestInstructionCanBeReExecuted: false,
 				}
 
-				// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
-				couldSend, _ := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
+				// Send response and start processing TestInstruction in parallell
+				go func() {
+					// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
+					couldSend, _ := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
 
-				// If response could be sent back to Worker then execute TestInstruction
-				if couldSend == true {
+					// If response could be sent back to Worker then execute TestInstruction
+					if couldSend == true {
 
-					// Call 'CA' backend to execute TestInstruction
-					// TODO send TestInstruction over CommandChannel
+						// Call 'CA' backend to execute TestInstruction
+						// TODO send TestInstruction over CommandChannel
+						fmt.Println("Execution TestInstruction at Custody Arrangement-Automation")
 
-				}
+					}
+				}()
+
 			}
 
 		}
