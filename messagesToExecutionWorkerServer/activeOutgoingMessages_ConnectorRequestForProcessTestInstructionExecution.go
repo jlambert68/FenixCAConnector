@@ -5,13 +5,23 @@ import (
 	"context"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"io"
+	"time"
 )
 
 // InitiateConnectorRequestForProcessTestInstructionExecution
 // This gPRC-methods is used when a Execution Connector needs to have its TestInstruction assignments using reverse streaming
 // Execution Connector opens the gPRC-channel and assignments are then streamed back to Connector from Worker
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateConnectorRequestForProcessTestInstructionExecution() {
+
+	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		"id": "c8e7cbdb-46bd-4545-a472-056fff940365",
+	}).Debug("Incoming 'InitiateConnectorRequestForProcessTestInstructionExecution'")
+
+	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		"id": "be16c2a2-4443-4e55-8ad1-9c8478a75e12",
+	}).Debug("Outgoing 'InitiateConnectorRequestForProcessTestInstructionExecution'")
 
 	var ctx context.Context
 	var returnMessageAckNack bool
@@ -91,15 +101,40 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				}).Debug("'Keep alive' message received from Worker")
 
 			} else {
-
 				// Is a standard TestInstruction to execute by Connector backend
 				common_config.Logger.WithFields(logrus.Fields{
 					"ID": "d1ea4370-3e8e-4d2b-9626-a193213e091a",
 					"processTestInstructionExecutionReveredRequest": processTestInstructionExecutionReveredRequest,
 				}).Debug("Receive TestInstructionExecution from Worker")
 
-				// Call 'CA' backend to execute TestInstruction
-				// TODO send TestInstruction over CommandChannel
+				// Generate duration for Execution:: TODO This is only for test and should be done in another way later
+				executionDuration := time.Minute * 5
+				timeAtDurationEnd := time.Now().Add(executionDuration)
+
+				// Generate response message to Worker
+				var processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse
+				processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
+					AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
+						AckNack:                      true,
+						Comments:                     "",
+						ErrorCodes:                   nil,
+						ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+					},
+					TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+					ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
+					TestInstructionCanBeReExecuted: false,
+				}
+
+				// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
+				couldSend, _ := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
+
+				// If response could be sent back to Worker then execute TestInstruction
+				if couldSend == true {
+
+					// Call 'CA' backend to execute TestInstruction
+					// TODO send TestInstruction over CommandChannel
+
+				}
 			}
 
 		}

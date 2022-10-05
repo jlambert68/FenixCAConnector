@@ -11,6 +11,14 @@ import (
 // SendAreYouAliveToFenixExecutionServer - Ask Execution Connector to check if Worker is up and running
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYouAliveToFenixExecutionServer() (bool, string) {
 
+	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		"id": "5792072c-20a9-490b-a7cf-8c4f80979552",
+	}).Debug("Incoming 'SendAreYouAliveToFenixExecutionServer'")
+
+	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		"id": "353930b1-5c6f-4826-955c-19f543e2ab85",
+	}).Debug("Outgoing 'SendAreYouAliveToFenixExecutionServer'")
+
 	var ctx context.Context
 	var returnMessageAckNack bool
 	var returnMessageString string

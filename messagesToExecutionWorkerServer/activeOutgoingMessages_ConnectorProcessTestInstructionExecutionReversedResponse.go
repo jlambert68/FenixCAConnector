@@ -9,15 +9,15 @@ import (
 )
 
 // SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer - When a TestInstruction has been fully executed the Client use this to inform the results of the execution result to the Worker (who the forward the message to the Execution Server)
-func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage) (bool, string) {
+func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse) (bool, string) {
 
 	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
-		"id": "4c59bea3-32a6-4805-bab8-48d4f513bfa6",
-	}).Debug("Incoming 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
+		"id": "7deef335-37fb-462c-978c-5a97a52c207f",
+	}).Debug("Incoming 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
 
 	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
-		"id": "c00de37a-d0ba-4a6e-9d36-dd6adb39dac1",
-	}).Debug("Outgoing 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
+		"id": "f05c825b-16cf-4cc0-8e7a-37e375c24d17",
+	}).Debug("Outgoing 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
 
 	var ctx context.Context
 	var returnMessageAckNack bool
@@ -34,7 +34,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer func() {
 		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
-			"ID": "5f02b94f-b07d-4bd7-9607-89cf712824c9",
+			"ID": "209c1aaa-b5b6-4d4a-a04c-e3b328ac1eaf",
 		}).Debug("Running Defer Cancel function")
 		cancel()
 	}()
@@ -50,14 +50,14 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 
 	}
 
-	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
+	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorProcessTestInstructionExecutionReversedResponse(ctx, processTestInstructionExecutionReversedResponse)
 
 	// Shouldn't happen
 	if err != nil {
 		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
-			"ID":    "ebe601e0-14b9-42c5-8f8f-960acec80433",
+			"ID":    "bb37e04d-2154-47df-8eca-ea076a132a59",
 			"error": err,
-		}).Error("Problem to do gRPC-call to Fenix Execution Worker for 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
+		}).Error("Problem to do gRPC-call to Fenix Execution Worker for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
 
 		return false, err.Error()
 
@@ -66,10 +66,15 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
 			"ID":                               "e72c61f0-feb4-41d2-a10c-5989bca92cc2",
 			"Message from Fenix Worker Server": returnMessage.Comments,
-		}).Error("Problem to do gRPC-call to Worker Server for 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
+		}).Error("Problem to do gRPC-call to Worker Server for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
 
 		return false, err.Error()
 	}
+
+	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		"ID": "b48ae8cc-a145-4527-b417-b3bb815824fc",
+		"processTestInstructionExecutionReversedResponse": processTestInstructionExecutionReversedResponse,
+	}).Debug("Response regarding that worker received a TestInstruction to execute was successfully sent back to worker")
 
 	return returnMessage.AckNack, returnMessage.Comments
 
