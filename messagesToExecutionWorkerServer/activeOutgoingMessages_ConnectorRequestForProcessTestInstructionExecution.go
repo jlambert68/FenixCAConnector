@@ -15,11 +15,11 @@ import (
 // Execution Connector opens the gPRC-channel and assignments are then streamed back to Connector from Worker
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateConnectorRequestForProcessTestInstructionExecution() {
 
-	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+	common_config.Logger.WithFields(logrus.Fields{
 		"id": "c8e7cbdb-46bd-4545-a472-056fff940365",
 	}).Debug("Incoming 'InitiateConnectorRequestForProcessTestInstructionExecution'")
 
-	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+	common_config.Logger.WithFields(logrus.Fields{
 		"id": "be16c2a2-4443-4e55-8ad1-9c8478a75e12",
 	}).Debug("Outgoing 'InitiateConnectorRequestForProcessTestInstructionExecution'")
 

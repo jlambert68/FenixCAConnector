@@ -11,11 +11,11 @@ import (
 // SendAreYouAliveToFenixExecutionServer - Ask Execution Connector to check if Worker is up and running
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYouAliveToFenixExecutionServer() (bool, string) {
 
-	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+	common_config.Logger.WithFields(logrus.Fields{
 		"id": "5792072c-20a9-490b-a7cf-8c4f80979552",
 	}).Debug("Incoming 'SendAreYouAliveToFenixExecutionServer'")
 
-	toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+	common_config.Logger.WithFields(logrus.Fields{
 		"id": "353930b1-5c6f-4826-955c-19f543e2ab85",
 	}).Debug("Outgoing 'SendAreYouAliveToFenixExecutionServer'")
 
@@ -60,7 +60,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 
 	// Shouldn't happen
 	if err != nil {
-		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		common_config.Logger.WithFields(logrus.Fields{
 			"ID":    "818aaf0b-4112-4be4-97b9-21cc084c7b8b",
 			"error": err,
 		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendAreYouAliveToFenixExecutionServer'")
@@ -69,7 +69,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 
 	} else if returnMessage.AckNack == false {
 		// FenixTestDataSyncServer couldn't handle gPRC call
-		toExecutionWorkerObject.Logger.WithFields(logrus.Fields{
+		common_config.Logger.WithFields(logrus.Fields{
 			"ID":                                  "2ecbc800-2fb6-4e88-858d-a421b61c5529",
 			"Message from Fenix Execution Server": returnMessage.Comments,
 		}).Error("Problem to do gRPC-call to FenixExecutionServer for 'SendAreYouAliveToFenixExecutionServer'")
