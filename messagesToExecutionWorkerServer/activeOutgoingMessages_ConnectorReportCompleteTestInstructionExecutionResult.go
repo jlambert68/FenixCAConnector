@@ -12,11 +12,11 @@ import (
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage) (bool, string) {
 
 	common_config.Logger.WithFields(logrus.Fields{
-		"id": "4c59bea3-32a6-4805-bab8-48d4f513bfa6",
+		"id": "db3419cd-f18b-4efa-b417-0d44cbf613e8",
 	}).Debug("Incoming 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
 
 	common_config.Logger.WithFields(logrus.Fields{
-		"id": "c00de37a-d0ba-4a6e-9d36-dd6adb39dac1",
+		"id": "11816322-9f48-4cfb-9329-49ab3a887d9d",
 	}).Debug("Outgoing 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
 
 	var ctx context.Context
@@ -64,7 +64,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 	} else if returnMessage.AckNack == false {
 		// FenixTestDataSyncServer couldn't handle gPRC call
 		common_config.Logger.WithFields(logrus.Fields{
-			"ID":                               "e72c61f0-feb4-41d2-a10c-5989bca92cc2",
+			"ID":                               "02fe4ebe-c439-41f3-97be-a9f128bc56aa",
 			"Message from Fenix Worker Server": returnMessage.Comments,
 		}).Error("Problem to do gRPC-call to Worker Server for 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
 

@@ -2,9 +2,12 @@ package gRPCServer
 
 import (
 	"FenixCAConnector/common_config"
-	"FenixCAConnector/connectorEngine"
+	"FenixCAConnector/messagesToExecutionWorkerServer"
+	"FenixCAConnector/systemSpecific_CA"
 	"context"
+	"fmt"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,40 +16,51 @@ import (
 func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportCompleteTestInstructionExecutionResult(ctx context.Context, triggerTestInstructionExecutionResultMessage *fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage) (ackNackResponse *fenixExecutionConnectorGrpcApi.AckNackResponse, err error) {
 
 	s.logger.WithFields(logrus.Fields{
-		"id": "a6acfc70-deb0-42d6-b6f9-40c3df66256a",
+		"id": "314111b4-6160-4662-a40a-91643e6d1fda",
 	}).Debug("Incoming 'gRPCServer - TriggerReportCompleteTestInstructionExecutionResult'")
 
 	defer s.logger.WithFields(logrus.Fields{
-		"id": "0778c0a5-71ee-4b9a-b9bc-f7fc8fecc93d",
+		"id": "b580c24b-3f2a-471e-ad0a-abb1cedf8619",
 	}).Debug("Outgoing 'gRPCServer - TriggerReportCompleteTestInstructionExecutionResult'")
 
-	// Calling system
-	userId := "External Trigger"
+	// Current user
+	userID := "gRPC-api doesn't support UserId"
 
 	// Check if Client is using correct proto files version
-	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userId, triggerTestInstructionExecutionResultMessage.ProtoFileVersionUsedByCaller)
+	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userID, fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(triggerTestInstructionExecutionResultMessage.ProtoFileVersionUsedByCaller))
 	if returnMessage != nil {
 
+		// Exiting
 		return returnMessage, nil
 	}
 
-	// Send Message on CommandChannel to be able to send Result back to Fenix Execution Server
-	channelCommand := connectorEngine.ChannelCommandStruct{
-		ChannelCommand: connectorEngine.ChannelCommandTriggerReportCompleteTestInstructionExecutionResult,
-		ReportCompleteTestInstructionExecutionResultParameter: connectorEngine.ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
-			TriggerTestInstructionExecutionResultMessage: triggerTestInstructionExecutionResultMessage},
+	// Set up instance to use for execution gPRC
+	var fenixExecutionWorkerObject *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
+	fenixExecutionWorkerObject = &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{Logger: s.logger}
+
+	// Create 'FinalTestInstructionExecutionResultMessage'
+	var finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
+	finalTestInstructionExecutionResultMessage = &fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage{
+		ClientSystemIdentification: &fenixExecutionWorkerGrpcApi.ClientSystemIdentificationMessage{
+			DomainUuid:                   systemSpecific_CA.DomainUuid,
+			ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+		},
+		TestInstructionExecutionUuid:   triggerTestInstructionExecutionResultMessage.TestInstructionExecutionUuid,
+		TestInstructionExecutionStatus: fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum(triggerTestInstructionExecutionResultMessage.TestInstructionExecutionStatus),
 	}
 
-	*s.CommandChannelReference <- channelCommand
+	succeededToSend, responseMessage := fenixExecutionWorkerObject.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessage)
 
-	// Generate response
-	ackNackResponse = &fenixExecutionConnectorGrpcApi.AckNackResponse{
-		AckNack:                         true,
-		Comments:                        "",
-		ErrorCodes:                      nil,
+	// Create Error Codes
+	var errorCodes []fenixExecutionConnectorGrpcApi.ErrorCodesEnum
+
+	ackNackResponseMessage := &fenixExecutionConnectorGrpcApi.AckNackResponse{
+		AckNack:                         succeededToSend,
+		Comments:                        fmt.Sprintf("The response from Worker is '%s'", responseMessage),
+		ErrorCodes:                      errorCodes,
 		ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(common_config.GetHighestConnectorProtoFileVersion()),
 	}
 
-	return ackNackResponse, nil
+	return ackNackResponseMessage, nil
 
 }
