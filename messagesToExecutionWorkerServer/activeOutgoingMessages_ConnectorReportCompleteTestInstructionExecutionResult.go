@@ -68,7 +68,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 			"Message from Fenix Worker Server": returnMessage.Comments,
 		}).Error("Problem to do gRPC-call to Worker Server for 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
 
-		return false, err.Error()
+		return false, returnMessage.Comments
 	}
 
 	return returnMessage.AckNack, returnMessage.Comments

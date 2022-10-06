@@ -9,6 +9,7 @@ import (
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // TriggerReportCompleteTestInstructionExecutionResult
@@ -38,6 +39,10 @@ func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportCompleteTestIns
 	var fenixExecutionWorkerObject *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
 	fenixExecutionWorkerObject = &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{Logger: s.logger}
 
+	// Create TimeStamp in gRPC-format
+	var grpcCurrentTimeStamp *timestamppb.Timestamp
+	grpcCurrentTimeStamp = timestamppb.Now()
+
 	// Create 'FinalTestInstructionExecutionResultMessage'
 	var finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
 	finalTestInstructionExecutionResultMessage = &fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage{
@@ -45,8 +50,9 @@ func (s *fenixExecutionConnectorGrpcServicesServer) TriggerReportCompleteTestIns
 			DomainUuid:                   systemSpecific_CA.DomainUuid,
 			ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
 		},
-		TestInstructionExecutionUuid:   triggerTestInstructionExecutionResultMessage.TestInstructionExecutionUuid,
-		TestInstructionExecutionStatus: fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum(triggerTestInstructionExecutionResultMessage.TestInstructionExecutionStatus),
+		TestInstructionExecutionUuid:         triggerTestInstructionExecutionResultMessage.TestInstructionExecutionUuid,
+		TestInstructionExecutionStatus:       fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum(triggerTestInstructionExecutionResultMessage.TestInstructionExecutionStatus),
+		TestInstructionExecutionEndTimeStamp: grpcCurrentTimeStamp,
 	}
 
 	succeededToSend, responseMessage := fenixExecutionWorkerObject.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessage)
