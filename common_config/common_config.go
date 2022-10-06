@@ -6,4 +6,4 @@ import "github.com/sirupsen/logrus"
 
 // LoggingLevel const LoggingLevel = logrus.DebugLevel
 //const LoggingLevel = logrus.InfoLevel
-const LoggingLevel = logrus.DebugLevel // InfoLevel
+var LoggingLevel logrus.Level // logrus.DebugLevel // InfoLevel

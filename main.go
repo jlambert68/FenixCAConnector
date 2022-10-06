@@ -2,6 +2,7 @@ package main
 
 import (
 	"FenixCAConnector/common_config"
+	"github.com/sirupsen/logrus"
 	"strconv"
 
 	//"flag"
@@ -90,5 +91,22 @@ func init() {
 
 	// Build the Dial-address for gPRC-call
 	common_config.FenixExecutionWorkerAddressToDial = common_config.FenixExecutionWorkerAddress + ":" + strconv.Itoa(common_config.FenixExecutionWorkerPort)
+
+	// Extract Debug level
+	var loggingLevel = mustGetenv("LoggingLevel")
+
+	switch loggingLevel {
+
+	case "DebugLevel":
+		common_config.LoggingLevel = logrus.DebugLevel
+
+	case "InfoLevel":
+		common_config.LoggingLevel = logrus.InfoLevel
+
+	default:
+		fmt.Println("Unknown LoggingLevel '" + loggingLevel + "'. Expected one of the following: 'DebugLevel', 'InfoLevel'")
+		os.Exit(0)
+
+	}
 
 }
