@@ -26,7 +26,7 @@ func cleanup() {
 	}
 }
 
-func fenixExecutionConnectorMain() {
+func fenixExecutionConnectorMain(loggerFileName string) {
 
 	// Set up BackendObject
 	fenixExecutionConnectorObject = &fenixExecutionConnectorObjectStruct{
@@ -35,7 +35,7 @@ func fenixExecutionConnectorMain() {
 	}
 
 	// Init logger
-	fenixExecutionConnectorObject.InitLogger("")
+	fenixExecutionConnectorObject.InitLogger(loggerFileName)
 
 	common_config.Logger = fenixExecutionConnectorObject.logger
 
