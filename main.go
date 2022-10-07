@@ -23,15 +23,63 @@ import (
 
 // mustGetEnv is a helper function for getting environment variables.
 // Displays a warning if the environment variable is not set.
-func mustGetenv(k string) string {
-	v := os.Getenv(k)
-	if v == "" {
-		log.Fatalf("Warning: %s environment variable not set.\n", k)
+func mustGetenv(environmentVariableName string) string {
+
+	var environmentVariable string
+
+	if useInjectedEnvironmentVariales == "true" {
+		// Extract environment variables from parameters feed into program at compilation time
+
+		switch environmentVariableName {
+		case "LoggingLevel":
+			environmentVariable = loggingLevel
+
+		case "ExecutionConnectorPort":
+			environmentVariable = executionConnectorPort
+
+		case "ExecutionLocationForConnector":
+			environmentVariable = executionLocationForConnector
+
+		case "ExecutionLocationForWorker":
+			environmentVariable = executionLocationForWorker
+
+		case "ExecutionWorkerAddress":
+			environmentVariable = executionWorkerAddress
+
+		case "ExecutionWorkerPort":
+			environmentVariable = executionWorkerPort
+
+		default:
+			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
+
+		}
+
+		if environmentVariable == "" {
+			log.Fatalf("Warning: %s environment variable not set.\n", environmentVariableName)
+		}
+
+	} else {
+		//
+		environmentVariable = os.Getenv(environmentVariableName)
+		if environmentVariable == "" {
+			log.Fatalf("Warning: %s environment variable not set.\n", environmentVariableName)
+		}
+
 	}
-	return v
+	return environmentVariable
 }
 
-var runInTray string
+// Variables injected at compilation time
+var (
+	useInjectedEnvironmentVariales string
+	runInTray                      string
+	loggingLevel                   string
+	executionConnectorPort         string
+	executionLocationForConnector  string
+	executionLocationForWorker     string
+	executionWorkerAddress         string
+	executionWorkerPort            string
+)
 
 func main() {
 
@@ -48,7 +96,7 @@ func main() {
 	if runInTray == "true" {
 		// Start application as TrayApplication
 
-		a := app.New()
+		a := app.NewWithID("FenixCAConnector")
 		a.SetIcon(resourceFenix57Png)
 		mainFyneWindow := a.NewWindow("SysTray")
 
@@ -56,6 +104,9 @@ func main() {
 			m := fyne.NewMenu("Fenix Execution Connector",
 				fyne.NewMenuItem("Hide", func() {
 					mainFyneWindow.Hide()
+					newNotification := fyne.NewNotification("MyTitle", "MyCOntent")
+
+					a.SendNotification(newNotification)
 				}))
 			desk.SetSystemTrayMenu(m)
 		}
@@ -89,7 +140,11 @@ func main() {
 			splashWindow.Show()
 
 			go func() {
-				time.Sleep(time.Second * 7)
+				time.Sleep(time.Millisecond * 1000)
+
+				mainFyneWindow.Hide()
+
+				time.Sleep(time.Second * 6)
 				splashWindow.Close()
 
 			}()
@@ -99,10 +154,22 @@ func main() {
 				mainFyneWindow.Hide()
 			})
 
+			mainFyneWindow.Hide()
 			go func() {
-				time.Sleep(time.Millisecond * 1000)
-				mainFyneWindow.Hide()
+				count := 10
+				for {
+					time.Sleep(time.Millisecond * 100)
+					//mainFyneWindow.Hide()
+					count = count - 1
+					if count == 0 {
+						break
+					}
+					return
+				}
+
+				//mainFyneWindow.Hide()
 			}()
+
 			mainFyneWindow.ShowAndRun()
 		}
 
@@ -186,7 +253,7 @@ func init() {
 	// Port for Fenix Execution Connector Server
 	common_config.ExecutionConnectorPort, err = strconv.Atoi(mustGetenv("ExecutionConnectorPort"))
 	if err != nil {
-		fmt.Println("Couldn't convert environment variable 'ExecutionConnectorPort' to an integer, error: ", err)
+		fmt.Println("Couldn't convert environment variable 'executionConnectorPort' to an integer, error: ", err)
 		os.Exit(0)
 
 	}
@@ -206,7 +273,7 @@ func init() {
 		common_config.LoggingLevel = logrus.InfoLevel
 
 	default:
-		fmt.Println("Unknown LoggingLevel '" + loggingLevel + "'. Expected one of the following: 'DebugLevel', 'InfoLevel'")
+		fmt.Println("Unknown loggingLevel '" + loggingLevel + "'. Expected one of the following: 'DebugLevel', 'InfoLevel'")
 		os.Exit(0)
 
 	}

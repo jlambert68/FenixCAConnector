@@ -14,13 +14,13 @@ func (fenixExecutionWorkerObject *fenixExecutionConnectorObjectStruct) InitLogge
 	switch common_config.LoggingLevel {
 
 	case logrus.DebugLevel:
-		log.Println("'common_config.LoggingLevel': ", common_config.LoggingLevel)
+		log.Println("'common_config.loggingLevel': ", common_config.LoggingLevel)
 
 	case logrus.InfoLevel:
-		log.Println("'common_config.LoggingLevel': ", common_config.LoggingLevel)
+		log.Println("'common_config.loggingLevel': ", common_config.LoggingLevel)
 
 	case logrus.WarnLevel:
-		log.Println("'common_config.LoggingLevel': ", common_config.LoggingLevel)
+		log.Println("'common_config.loggingLevel': ", common_config.LoggingLevel)
 
 	default:
 		log.Println("Not correct value for debugging-level, this was used: ", common_config.LoggingLevel)
