@@ -5,14 +5,8 @@ import (
 	"crypto/tls"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/api/idtoken"
-	grpcMetadata "google.golang.org/grpc/metadata"
-	"time"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
-	"golang.org/x/net/context"
 )
 
 // ********************************************************************************************************************
@@ -64,11 +58,12 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 	return err
 }
 
+/*
 // Generate Google access token. Used when running in GCP
 func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) generateGCPAccessToken(ctx context.Context) (appendedCtx context.Context, returnAckNack bool, returnMessage string) {
 
 	// Only create the token if there is none, or it has expired
-	if toExecutionWorkerObject.gcpAccessToken == nil || toExecutionWorkerObject.gcpAccessToken.Expiry.Before(time.Now()) {
+	if toExecutionWorkerObject.GcpAccessToken == nil || toExecutionWorkerObject.GcpAccessToken.Expiry.Before(time.Now()) {
 
 		// Create an identity token.
 		// With a global TokenSource tokens would be reused and auto-refreshed at need.
@@ -98,18 +93,20 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) generateGC
 			}).Debug("Got Bearer Token")
 		}
 
-		toExecutionWorkerObject.gcpAccessToken = token
+		toExecutionWorkerObject.GcpAccessToken = token
 
 	}
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"ID": "cd124ca3-87bb-431b-9e7f-e044c52b4960",
-		"FenixExecutionWorkerObject.gcpAccessToken": toExecutionWorkerObject.gcpAccessToken,
+		"FenixExecutionWorkerObject.gcpAccessToken": toExecutionWorkerObject.GcpAccessToken,
 	}).Debug("Will use Bearer Token")
 
 	// Add token to GrpcServer Request.
-	appendedCtx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+toExecutionWorkerObject.gcpAccessToken.AccessToken)
+	appendedCtx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+toExecutionWorkerObject.GcpAccessToken.AccessToken)
 
 	return appendedCtx, true, ""
 
 }
+
+*/

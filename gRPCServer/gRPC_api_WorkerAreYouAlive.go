@@ -34,7 +34,10 @@ func (s *fenixExecutionConnectorGrpcServicesServer) WorkerAreYouAlive(ctx contex
 
 	// Set up instance to use for execution gPRC
 	var fenixExecutionWorkerObject *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
-	fenixExecutionWorkerObject = &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{Logger: s.logger}
+	fenixExecutionWorkerObject = &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{
+		Logger: s.logger,
+		//GcpAccessToken: nil,
+	}
 
 	response, responseMessage := fenixExecutionWorkerObject.SendAreYouAliveToFenixExecutionServer()
 

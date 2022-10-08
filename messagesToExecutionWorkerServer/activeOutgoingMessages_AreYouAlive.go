@@ -2,6 +2,7 @@ package messagesToExecutionWorkerServer
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/gcp"
 	"context"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
@@ -49,7 +50,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 
 		// Add Access token
-		ctx, returnMessageAckNack, returnMessageString = toExecutionWorkerObject.generateGCPAccessToken(ctx)
+		ctx, returnMessageAckNack, returnMessageString = gcp.Gcp.GenerateGCPAccessTokenForAuthorizedUser(ctx)
 		if returnMessageAckNack == false {
 			return false, returnMessageString
 		}

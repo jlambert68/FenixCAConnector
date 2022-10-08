@@ -1,15 +1,16 @@
 package messagesToExecutionWorkerServer
 
 import (
+	"FenixCAConnector/gcp"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 )
 
 type MessagesToExecutionWorkerObjectStruct struct {
-	Logger         *logrus.Logger
-	gcpAccessToken *oauth2.Token
+	Logger *logrus.Logger
+	//GcpAccessToken *oauth2.Token
+	Gcp gcp.GcpObjectStruct
 	//CommandChannelReference *connectorEngine.ExecutionEngineChannelType
 }
 

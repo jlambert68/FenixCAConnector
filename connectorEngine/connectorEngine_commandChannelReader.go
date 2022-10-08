@@ -62,7 +62,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 		time.Sleep(sleepDuration)
 
 		// Call Worker to get TestInstructions to Execute
-		executionEngine.messagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
+		executionEngine.MessagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
 
 		executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = false
 
@@ -108,7 +108,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) SendReportCompleteT
 
 		// Send the result using a go-routine to be able to process next command on command-queue
 		go func() {
-			sendResult, errorMessage := executionEngine.messagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessageToExecutionServer)
+			sendResult, errorMessage := executionEngine.MessagesToExecutionWorkerObjectReference.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessageToExecutionServer)
 
 			if sendResult == false {
 				executionEngine.logger.WithFields(logrus.Fields{

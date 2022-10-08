@@ -4,6 +4,7 @@ import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/connectorEngine"
 	"FenixCAConnector/gRPCServer"
+	"FenixCAConnector/messagesToExecutionWorkerServer"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 )
@@ -26,18 +27,22 @@ func cleanup() {
 	}
 }
 
-func fenixExecutionConnectorMain(loggerFileName string) {
+func fenixExecutionConnectorMain() {
 
 	// Set up BackendObject
 	fenixExecutionConnectorObject = &fenixExecutionConnectorObjectStruct{
 		logger:     nil,
 		GrpcServer: &gRPCServer.FenixExecutionConnectorGrpcObjectStruct{},
+		TestInstructionExecutionEngine: connectorEngine.TestInstructionExecutionEngineStruct{
+			MessagesToExecutionWorkerObjectReference: &messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct{
+				//GcpAccessToken: nil,
+			},
+		},
 	}
 
 	// Init logger
-	fenixExecutionConnectorObject.InitLogger(loggerFileName)
-
-	common_config.Logger = fenixExecutionConnectorObject.logger
+	//fenixExecutionConnectorObject.InitLogger(loggerFileName)
+	fenixExecutionConnectorObject.logger = common_config.Logger
 
 	// Clean up when leaving. Is placed after logger because shutdown logs information
 	defer cleanup()
@@ -46,8 +51,8 @@ func fenixExecutionConnectorMain(loggerFileName string) {
 	connectorEngine.ExecutionEngineCommandChannel = make(chan connectorEngine.ChannelCommandStruct)
 
 	// Start ChannelCommand Engine
-	fenixExecutionConnectorObject.testInstructionExecutionEngine.CommandChannelReference = &connectorEngine.ExecutionEngineCommandChannel
-	fenixExecutionConnectorObject.testInstructionExecutionEngine.InitiateTestInstructionExecutionEngineCommandChannelReader(connectorEngine.ExecutionEngineCommandChannel)
+	fenixExecutionConnectorObject.TestInstructionExecutionEngine.CommandChannelReference = &connectorEngine.ExecutionEngineCommandChannel
+	fenixExecutionConnectorObject.TestInstructionExecutionEngine.InitiateTestInstructionExecutionEngineCommandChannelReader(connectorEngine.ExecutionEngineCommandChannel)
 
 	// Initiate  gRPC-server
 	fenixExecutionConnectorObject.GrpcServer.InitiategRPCObject(fenixExecutionConnectorObject.logger)

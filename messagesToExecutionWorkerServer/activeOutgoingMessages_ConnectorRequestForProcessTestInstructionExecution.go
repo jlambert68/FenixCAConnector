@@ -2,6 +2,7 @@ package messagesToExecutionWorkerServer
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/gcp"
 	"context"
 	"fmt"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
@@ -47,7 +48,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 
 		// Add Access token
-		ctx, returnMessageAckNack, _ = toExecutionWorkerObject.generateGCPAccessToken(ctx)
+		ctx, returnMessageAckNack, _ = gcp.Gcp.GenerateGCPAccessTokenForAuthorizedUser(ctx)
 		if returnMessageAckNack == false {
 			return
 		}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/gcp"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -10,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 	"os/signal"
 	"strconv"
 	"syscall"
@@ -27,10 +29,12 @@ func mustGetenv(environmentVariableName string) string {
 
 	var environmentVariable string
 
-	if useInjectedEnvironmentVariales == "true" {
+	if useInjectedEnvironmentVariables == "true" {
 		// Extract environment variables from parameters feed into program at compilation time
 
 		switch environmentVariableName {
+		case "RunInTray":
+			environmentVariable = runInTray
 		case "LoggingLevel":
 			environmentVariable = loggingLevel
 
@@ -71,29 +75,52 @@ func mustGetenv(environmentVariableName string) string {
 
 // Variables injected at compilation time
 var (
-	useInjectedEnvironmentVariales string
-	runInTray                      string
-	loggingLevel                   string
-	executionConnectorPort         string
-	executionLocationForConnector  string
-	executionLocationForWorker     string
-	executionWorkerAddress         string
-	executionWorkerPort            string
+	useInjectedEnvironmentVariables string
+	runInTray                       string
+	loggingLevel                    string
+	executionConnectorPort          string
+	executionLocationForConnector   string
+	executionLocationForWorker      string
+	executionWorkerAddress          string
+	executionWorkerPort             string
 )
 
 func main() {
 
 	var logFileName string
+
+	// Extract from environment variables if it should run as a tray application or not
+	shouldRunInTray := mustGetenv("RunInTray")
+
 	// When run as Tray application then add log-name
-	if runInTray == "true" {
+	if shouldRunInTray == "true" {
 		logFileName = "fenixConnectorLog.log"
 	} else {
 		logFileName = ""
 	}
 
-	go fenixExecutionConnectorMain(logFileName)
+	// Initiate logger in common_config
+	InitLogger(logFileName)
 
-	if runInTray == "true" {
+	// When Execution Worker runs on GCP, then set up access
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
+		gcp.Gcp = gcp.GcpObjectStruct{}
+
+		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+		// Generate first time Access token
+		_, returnMessageAckNack, returnMessageString := gcp.Gcp.GenerateGCPAccessTokenForAuthorizedUser(ctx)
+		if returnMessageAckNack == false {
+			// If there was any problem then exit program
+			log.Fatalf(fmt.Sprintln("Couldn't generate access token for GCP, return message: '%s'", returnMessageString))
+		}
+	}
+
+	// Start Connector Engine
+	go fenixExecutionConnectorMain()
+
+	// Start up Tray Application if it should that as that
+	if shouldRunInTray == "true" {
 		// Start application as TrayApplication
 
 		a := app.NewWithID("FenixCAConnector")

@@ -9,7 +9,7 @@ import (
 type TestInstructionExecutionEngineStruct struct {
 	logger                                                               *logrus.Logger
 	CommandChannelReference                                              *ExecutionEngineChannelType
-	messagesToExecutionWorkerObjectReference                             *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
+	MessagesToExecutionWorkerObjectReference                             *messagesToExecutionWorkerServer.MessagesToExecutionWorkerObjectStruct
 	ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute bool
 }
 

@@ -9,7 +9,7 @@ import (
 type fenixExecutionConnectorObjectStruct struct {
 	logger                         *logrus.Logger
 	GrpcServer                     *gRPCServer.FenixExecutionConnectorGrpcObjectStruct
-	testInstructionExecutionEngine connectorEngine.TestInstructionExecutionEngineStruct
+	TestInstructionExecutionEngine connectorEngine.TestInstructionExecutionEngineStruct
 }
 
 // Variable holding everything together
