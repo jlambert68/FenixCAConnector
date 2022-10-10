@@ -3,13 +3,13 @@ package common_config
 // ***********************************************************************************************************
 // The following variables receives their values from environment variables
 
-// Where is the Worker running
+// ExecutionLocationForConnector - Where is the Worker running
 var ExecutionLocationForConnector ExecutionLocationTypeType
 
-// Where is Fenix Execution Server running
+// ExecutionLocationForFenixExecutionWorkerServer  - Where is Fenix Execution Server running
 var ExecutionLocationForFenixExecutionWorkerServer ExecutionLocationTypeType
 
-// Definitions for where client and Fenix Server is running
+// ExecutionLocationTypeType - Definitions for where client and Fenix Server is running
 type ExecutionLocationTypeType int
 
 // Constants used for where stuff is running
@@ -25,4 +25,5 @@ var (
 	FenixExecutionWorkerPort          int
 	FenixExecutionWorkerAddressToDial string
 	ExecutionConnectorPort            int
+	GCPAuthentication                 bool
 )

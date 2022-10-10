@@ -53,6 +53,9 @@ func mustGetenv(environmentVariableName string) string {
 		case "ExecutionWorkerPort":
 			environmentVariable = executionWorkerPort
 
+		case "GCPAuthentication":
+			environmentVariable = gcpAuthentication
+
 		default:
 			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
 
@@ -83,6 +86,7 @@ var (
 	executionLocationForWorker      string
 	executionWorkerAddress          string
 	executionWorkerPort             string
+	gcpAuthentication               string
 )
 
 func main() {
@@ -103,7 +107,7 @@ func main() {
 	InitLogger(logFileName)
 
 	// When Execution Worker runs on GCP, then set up access
-	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP && common_config.GCPAuthentication == true {
 		gcp.Gcp = gcp.GcpObjectStruct{}
 
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
@@ -304,5 +308,13 @@ func init() {
 		os.Exit(0)
 
 	}
+
+	// Extract if there is a need for authentication when going toward GCP
+	boolValue, err := strconv.ParseBool(mustGetenv("GCPAuthentication"))
+	if err != nil {
+		fmt.Println("Couldn't convert environment variable 'GCPAuthentication:' to an boolean, error: ", err)
+		os.Exit(0)
+	}
+	common_config.GCPAuthentication = boolValue
 
 }
