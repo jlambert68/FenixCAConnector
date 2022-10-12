@@ -3,6 +3,8 @@ package messagesToExecutionWorkerServer
 import (
 	"FenixCAConnector/common_config"
 	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -16,10 +18,16 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 
 	var opts []grpc.DialOption
 
+	systemRoots, err := x509.SystemCertPool()
+	if err != nil {
+		panic(fmt.Sprintf("cannot load root CA certs, err: %s", err))
+	}
+
 	//When running on GCP then use credential otherwise not
 	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
+			RootCAs:            systemRoots,
 		})
 
 		opts = []grpc.DialOption{

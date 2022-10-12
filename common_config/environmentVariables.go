@@ -26,4 +26,6 @@ var (
 	FenixExecutionWorkerAddressToDial string
 	ExecutionConnectorPort            int
 	GCPAuthentication                 bool
+	CAEngineAddress                   string
+	CAEngineAddressPath               string
 )

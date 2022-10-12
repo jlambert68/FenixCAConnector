@@ -56,6 +56,12 @@ func mustGetenv(environmentVariableName string) string {
 		case "GCPAuthentication":
 			environmentVariable = gcpAuthentication
 
+		case "CAEngineAddress":
+			environmentVariable = caEngineAddress
+
+		case "CAEngineAddressPath":
+			environmentVariable = caEngineAddressPath
+
 		default:
 			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
 
@@ -87,6 +93,8 @@ var (
 	executionWorkerAddress          string
 	executionWorkerPort             string
 	gcpAuthentication               string
+	caEngineAddress                 string
+	caEngineAddressPath             string
 )
 
 func main() {
@@ -316,5 +324,9 @@ func init() {
 		os.Exit(0)
 	}
 	common_config.GCPAuthentication = boolValue
+
+	// Extract Address to Custody Arrangement Rest-Engine
+	common_config.CAEngineAddress = mustGetenv("CAEngineAddress")
+	common_config.CAEngineAddressPath = mustGetenv("CAEngineAddressPath")
 
 }
