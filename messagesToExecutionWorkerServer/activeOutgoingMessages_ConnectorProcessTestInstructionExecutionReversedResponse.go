@@ -24,8 +24,10 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendConnec
 	var returnMessageAckNack bool
 	var returnMessageString string
 
+	ctx = context.Background()
+
 	// Set up connection to Server
-	err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer()
+	ctx, err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer(ctx)
 	if err != nil {
 		return false, err.Error()
 	}

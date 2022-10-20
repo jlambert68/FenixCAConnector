@@ -24,8 +24,10 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 	var returnMessageAckNack bool
 	var returnMessageString string
 
+	ctx = context.Background()
+
 	// Set up connection to Server
-	err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer()
+	ctx, err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer(ctx)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -56,6 +58,10 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendAreYou
 		}
 
 	}
+
+	// Do the gRPC-call
+	//md2 := MetadataFromHeaders(headers)
+	//myctx := metadata.NewOutgoingContext(ctx, md2)
 
 	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorAreYouAlive(ctx, emptyParameter)
 
