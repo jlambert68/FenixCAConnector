@@ -3,6 +3,7 @@ package messagesToExecutionWorkerServer
 import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
+	"FenixCAConnector/restCallsToCAEngine"
 	"context"
 	"fmt"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
@@ -138,8 +139,13 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 					if couldSend == true {
 
 						// Call 'CA' backend to execute TestInstruction
-						// TODO send TestInstruction over CommandChannel
 						fmt.Println("Execution TestInstruction at Custody Arrangement-Automation")
+						err = restCallsToCAEngine.ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest)
+
+						if err != nil {
+							// Couldn't convert into FangEngine-messageType
+							//TODO Send response about failed TestInstruction to Worker
+						}
 
 					}
 				}()

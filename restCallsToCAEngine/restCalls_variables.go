@@ -6,10 +6,15 @@ import (
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/TypeAndStructs"
 )
 
-// Todo struct
-type Todo struct {
-	UserID    int    `json:"userId"`
-	ID        int    `json:"id"`
+// FangEngineRestApiMessageStruct
+// Used when converting a TestInstruction into data to be used in RestCall to FangEngine
+type FangEngineRestApiMessageStruct struct {
+	FangEngineClassNameNAME           FangEngineClassesAndMethods.FangEngine_ClassName_Name_CA_Type
+	FangEngineMethodNameNAME          FangEngineClassesAndMethods.FangEngine_MethodName_Name_CA_Type
+	FangEngineExpectedToBePassedValue TypeAndStructs.AttributeValueAsStringType
+	TestInstructionAttributesUUID     []TypeAndStructs.TestInstructionAttributeUUIDType
+	FangAttributes                    map[TypeAndStructs.TestInstructionAttributeUUIDType]FangEngineClassesAndMethods.FangEngineAttributesStruct
+
 	Title     string `json:"title"`
 	Completed bool   `json:"completed"`
 }
