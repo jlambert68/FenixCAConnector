@@ -12,11 +12,19 @@ type FangEngineRestApiMessageStruct struct {
 	FangEngineClassNameNAME           FangEngineClassesAndMethods.FangEngine_ClassName_Name_CA_Type
 	FangEngineMethodNameNAME          FangEngineClassesAndMethods.FangEngine_MethodName_Name_CA_Type
 	FangEngineExpectedToBePassedValue TypeAndStructs.AttributeValueAsStringType
-	TestInstructionAttributesUUID     []TypeAndStructs.TestInstructionAttributeUUIDType
-	FangAttributes                    map[TypeAndStructs.TestInstructionAttributeUUIDType]FangEngineClassesAndMethods.FangEngineAttributesStruct
+	TestInstructionAttribute          []TestInstructionAttributesUuidAndValueStruct
+	FangAttributes                    map[TypeAndStructs.TestInstructionAttributeUUIDType]*FangEngineClassesAndMethods.FangEngineAttributesStruct
 
 	Title     string `json:"title"`
 	Completed bool   `json:"completed"`
+}
+
+// TestInstructionAttributesUuidAndValueStruct
+// Holds one Attribute UUID, Name and Value
+type TestInstructionAttributesUuidAndValueStruct struct {
+	TestInstructionAttributeUUID          TypeAndStructs.TestInstructionAttributeUUIDType
+	TestInstructionAttributeName          TypeAndStructs.TestInstructionAttributeNameType
+	TestInstructionAttributeValueAsString TypeAndStructs.AttributeValueAsStringType
 }
 
 var (
