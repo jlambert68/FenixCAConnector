@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/pat v1.0.1
 	github.com/gorilla/sessions v1.2.1
 	github.com/jlambert68/FenixGrpcApi v0.0.0-20221006075932-f3652b179e7c
+	github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221021144532-455063660510
 	github.com/markbates/goth v1.73.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/toqueteos/webbrowser v1.2.0
@@ -15,6 +16,7 @@ require (
 	google.golang.org/api v0.95.0
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
+
 )
 
 require (

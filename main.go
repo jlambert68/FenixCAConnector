@@ -3,6 +3,7 @@ package main
 import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
+	"FenixCAConnector/restCallsToCAEngine"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -127,6 +128,9 @@ func main() {
 			log.Fatalf(fmt.Sprintln("Couldn't generate access token for GCP, return message: '%s'", returnMessageString))
 		}
 	}
+
+	// InitiateRestCallsToCAEngine()
+	restCallsToCAEngine.InitiateRestCallsToCAEngine()
 
 	// Start Connector Engine
 	go fenixExecutionConnectorMain()

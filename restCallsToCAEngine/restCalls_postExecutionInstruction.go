@@ -10,6 +10,11 @@ import (
 	"net/http"
 )
 
+func DoPost() (err error) {
+
+	return err
+}
+
 func postExecutionInstruction(todo Todo) (err error) {
 	fmt.Println("2. Performing Http Post...")
 
