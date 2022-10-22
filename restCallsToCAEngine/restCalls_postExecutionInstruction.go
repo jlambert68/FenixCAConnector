@@ -3,7 +3,6 @@ package restCallsToCAEngine
 import (
 	"FenixCAConnector/common_config"
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
@@ -15,14 +14,15 @@ import (
 	"net/http"
 )
 
-func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest) (err error) {
+func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest) (fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct, err error) {
 
-	// Extract TestInstructionUUID from TestInstructionExecutionRequest
+	// Extract TestInstructionUUID from 'TestInstructionExecutionRequest'
 	testInstructionUuid := processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionUuid
 
-	// Extract TestInstructionAttributes from TestInstructionExecutionRequest
+	// Extract TestInstructionAttributes from 'TestInstructionExecutionRequest'
 	testInstructionAttributes := processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionAttributes
 
+	// Extract relevant FangEngineData to be used in mapping
 	fangEngineData, existsInMap := fangEngineClassesMethodsAttributesMap[TypeAndStructs.OriginalElementUUIDType(testInstructionUuid)]
 	if existsInMap != true {
 		// Must exist in map
@@ -34,12 +34,11 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 		errorID := "4faf3e89-f647-494c-8cd2-3f0623db68c6"
 		err = errors.New(fmt.Sprintf("couldn't find correct FangEngineData in 'fangEngineClassesMethodsAttributesMap' for TestInstructionUuid:'%s', [ErrorID='%s']", testInstructionUuid, errorID))
 
-		return err
+		return nil, err
 	}
 
 	// Values to be used in RestCall
-	var tempFangEngineRestApiMessage *FangEngineRestApiMessageStruct
-	tempFangEngineRestApiMessage = &FangEngineRestApiMessageStruct{
+	fangEngineRestApiMessageValues = &FangEngineRestApiMessageStruct{
 		FangEngineClassNameNAME:  fangEngineData.FangEngineClassNameNAME,
 		FangEngineMethodNameNAME: fangEngineData.FangEngineMethodNameNAME,
 		FangAttributes:           make(map[TypeAndStructs.TestInstructionAttributeUUIDType]*FangEngineClassesAndMethods.FangEngineAttributesStruct),
@@ -57,8 +56,8 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 				TestInstructionAttributeName:          TypeAndStructs.TestInstructionAttributeNameType(testInstructionAttribute.TestInstructionAttributeName),
 				TestInstructionAttributeValueAsString: TypeAndStructs.AttributeValueAsStringType(testInstructionAttribute.AttributeValueAsString),
 			}
-			tempFangEngineRestApiMessage.TestInstructionAttribute = append(
-				tempFangEngineRestApiMessage.TestInstructionAttribute,
+			fangEngineRestApiMessageValues.TestInstructionAttribute = append(
+				fangEngineRestApiMessageValues.TestInstructionAttribute,
 				tempTestInstructionAttributesUuidAndValue)
 
 			// Extract FangEngineAttribute-data
@@ -73,7 +72,7 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 				errorID := "0ce6aea7-ce07-4ae9-8c9f-227efb621e92"
 				err = errors.New(fmt.Sprintf("couldn't find correct FangEngineData in 'fangEngineData.Attributes' for TestInstructionAttributeUuid:'%s', [ErrorID='%s']", testInstructionUuid, errorID))
 
-				return err
+				return nil, err
 			}
 
 			// Create and add reference between Attribute FangAttribute-name to be used in RestRequest
@@ -84,43 +83,88 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 				FangEngineAttributeNameUUID:  fangEngineDataAttribute.FangEngineAttributeNameUUID,
 				FangEngineAttributeNameName:  fangEngineDataAttribute.FangEngineAttributeNameName,
 			}
+			// Add Attribute
+			fangEngineRestApiMessageValues.FangAttributes[TypeAndStructs.TestInstructionAttributeUUIDType(testInstructionAttribute.TestInstructionAttributeUuid)] = tempFangAttributes
 
 		} else {
 			// Attribute is 'ExpectedToBePassedValue'
-			tempFangEngineRestApiMessage.FangEngineExpectedToBePassedValue = TypeAndStructs.AttributeValueAsStringType(testInstructionAttribute.AttributeValueAsString)
+			fangEngineRestApiMessageValues.FangEngineExpectedToBePassedValue = TypeAndStructs.AttributeValueAsStringType(testInstructionAttribute.AttributeValueAsString)
 		}
-
-		// Add Attributes
-		tempFangEngineRestApiMessage.FangAttributes = tempFangAttributes
 
 	}
 
 	// TODO Ändra TestInstructionAttributeType från 'Standard' till ExpectedExecutionResult
 
-	return err
+	return fangEngineRestApiMessageValues, err
 }
 
-func postExecutionInstruction(todo Todo) (err error) {
+func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct) (err error) {
 	fmt.Println("2. Performing Http Post...")
 
 	common_config.Logger.WithFields(logrus.Fields{
-		"id":   "38c5fd40-0aee-4cd0-9107-0974331db0cc",
-		"todo": todo,
-	}).Debug("Posting ExecutionInstruction to Custody Arrangements execution Engine")
+		"id":                             "38c5fd40-0aee-4cd0-9107-0974331db0cc",
+		"fangEngineRestApiMessageValues": fangEngineRestApiMessageValues,
+	}).Debug("Posting TestInstruction to Custody Arrangements execution Engine")
 
-	todo = Todo{1, 2, "lorem ipsum dolor sit amet", true}
+	// Generate json-body for RestCall, need to do it manually, because of strange json-structure with parameters just added instead of using an array
+	var tempAttributeString string //"additionalProp1": "string"
+	var jsonBodyAsString string
+	var firstAttribute bool
+	firstAttribute = true
+	for _, testInstructionAttribute := range fangEngineRestApiMessageValues.TestInstructionAttribute {
+		if firstAttribute == false {
+			tempAttributeString = ", "
+		} else {
+			tempAttributeString = ""
+			firstAttribute = false
+		}
 
-	jsonReq, err := json.Marshal(todo)
-	if err != nil {
-		common_config.Logger.WithFields(logrus.Fields{
-			"id":   "e1e74131-5040-43fa-abfc-1023f09d4388",
-			"todo": todo,
-		}).Error("Couldn't Marshal into json request")
+		tempAttributeString = tempAttributeString + "\"" +
+			string(testInstructionAttribute.TestInstructionAttributeName) +
+			":\" \"string\""
 
-		return err
+		jsonBodyAsString = jsonBodyAsString + tempAttributeString
 	}
 
-	resp, err := http.Post(common_config.CAEngineAddress+common_config.CAEngineAddressPath, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	jsonBodyAsString = "{" +
+		jsonBodyAsString +
+		"}"
+
+	/*
+		jsonReq, err := json.Marshal(fangEngineRestApiMessageValues)
+		if err != nil {
+			common_config.Logger.WithFields(logrus.Fields{
+				"id":                             "e1e74131-5040-43fa-abfc-1023f09d4388",
+				"fangEngineRestApiMessageValues": fangEngineRestApiMessageValues,
+			}).Error("Couldn't Marshal into json request")
+
+			return err
+		}
+	*/
+
+	// Create request-url
+	/*
+		https://igc-custodyarrangementtestauto-cax-test.sebshift.dev.sebank.se/TestCaseExecution/ExecuteTestActionMethod/a/b?expectedToBePassed=true
+
+		curl -X 'POST' \
+		  'https://igc-custodyarrangementtestauto-cax-test.sebshift.dev.sebank.se/TestCaseExecution/ExecuteTestActionMethod/a/b?expectedToBePassed=true' \
+		  -H 'accept: text/plain' \
+		  -H 'Content-Type: application/json' \
+		  -d '{
+		  "additionalProp1": "string",
+		  "additionalProp2": "string",
+		  "additionalProp3": "string"
+		}'
+	*/
+	var fangEngineUrl string
+	fangEngineUrl = "/TestCaseExecution/ExecuteTestActionMethod/" + string(fangEngineRestApiMessageValues.FangEngineClassNameNAME) +
+		"/" + string(fangEngineRestApiMessageValues.FangEngineMethodNameNAME) +
+		"?" + "expectedToBePassed=" + string(fangEngineRestApiMessageValues.FangEngineExpectedToBePassedValue)
+
+	fangEngineUrl = common_config.CAEngineAddress + fangEngineUrl
+
+	// Do RestCall to FangEngine
+	resp, err := http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(jsonBodyAsString)))
 	if err != nil {
 		common_config.Logger.WithFields(logrus.Fields{
 			"id": "b98c2fb4-e717-4fc4-8d2c-6c791c523175",
@@ -138,9 +182,9 @@ func postExecutionInstruction(todo Todo) (err error) {
 	fmt.Println(bodyString)
 
 	// Convert response body to Todo struct
-	var todoStruct Todo
-	json.Unmarshal(bodyBytes, &todoStruct)
-	fmt.Printf("%+v\n", todoStruct)
+	//var todoStruct Todo
+	//json.Unmarshal(bodyBytes, &todoStruct)
+	//fmt.Printf("%+v\n", todoStruct)
 
 	return err
 }

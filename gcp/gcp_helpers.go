@@ -136,8 +136,8 @@ func (gcp *GcpObjectStruct) GenerateGCPAccessTokenForAuthorizedUser(ctx context.
 
 	goth.UseProviders(
 		//google.New("our-google-client-id", "our-google-client-secret", "http://localhost:3000/auth/google/callback", "email", "profile"),
-		//google.New("944682210385-gpambi3aqcs7g6nf5abm7vdhi32crp8l.apps.googleusercontent.com", "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", "http://localhost:3000/auth/google/callback", "email", "profile", "https://www.googleapis.com/auth/cloud-platform"),
-		google.New("545236753209-kqn7ibor4guvatfd5j3m5kdt5ivgv2f4.apps.googleusercontent.com", "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", "http://localhost:3000/auth/google/callback", "email", "profile"),
+		google.New("944682210385-gpambi3aqcs7g6nf5abm7vdhi32crp8l.apps.googleusercontent.com", "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", "http://localhost:3000/auth/google/callback", "email", "profile", "https://www.googleapis.com/auth/cloud-platform"),
+		//google.New("545236753209-kqn7ibor4guvatfd5j3m5kdt5ivgv2f4.apps.googleusercontent.com", "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", "http://localhost:3000/auth/google/callback", "email", "profile"),
 	)
 	//545236753209-kqn7ibor4guvatfd5j3m5kdt5ivgv2f4.apps.googleusercontent.com
 	//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

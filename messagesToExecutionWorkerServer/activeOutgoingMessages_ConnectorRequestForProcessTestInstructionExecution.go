@@ -140,12 +140,16 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 
 						// Call 'CA' backend to execute TestInstruction
 						fmt.Println("Execution TestInstruction at Custody Arrangement-Automation")
-						err = restCallsToCAEngine.ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest)
+						var fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct
+						fangEngineRestApiMessageValues, err = restCallsToCAEngine.ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest)
 
 						if err != nil {
 							// Couldn't convert into FangEngine-messageType
 							//TODO Send response about failed TestInstruction to Worker
 						}
+
+						// Send TestInstruction to FangEngine using RestCall
+						err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
 
 					}
 				}()
