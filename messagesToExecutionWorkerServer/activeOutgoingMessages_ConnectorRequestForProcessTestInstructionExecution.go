@@ -145,11 +145,65 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 
 						if err != nil {
 							// Couldn't convert into FangEngine-messageType
-							//TODO Send response about failed TestInstruction to Worker
-						}
+							timeAtDurationEnd := time.Now()
 
-						// Send TestInstruction to FangEngine using RestCall
-						err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
+							// Generate response message to Worker
+							var processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse
+							processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
+								AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
+									AckNack:                      false,
+									Comments:                     err.Error(),
+									ErrorCodes:                   nil,
+									ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+								},
+								TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+								ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
+								TestInstructionCanBeReExecuted: true,
+							}
+
+							// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
+							couldSend, returnMessage := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
+
+							if couldSend == false {
+								common_config.Logger.WithFields(logrus.Fields{
+									"ID":            "95dddb21-0895-4016-9cb5-97ab4568f30b",
+									"returnMessage": returnMessage,
+								}).Debug("Couldn't send repsonse to Worker")
+
+							}
+
+						} else {
+
+							// Send TestInstruction to FangEngine using RestCall
+							err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
+
+							if err != nil {
+								// Couldn't do RestCall, Generate response message to Worker
+								var processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse
+								processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
+									AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
+										AckNack:                      false,
+										Comments:                     err.Error(),
+										ErrorCodes:                   nil,
+										ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+									},
+									TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+									ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
+									TestInstructionCanBeReExecuted: true,
+								}
+
+								// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
+								couldSend, returnMessage := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
+
+								if couldSend == false {
+									common_config.Logger.WithFields(logrus.Fields{
+										"ID":            "95dddb21-0895-4016-9cb5-97ab4568f30b",
+										"returnMessage": returnMessage,
+									}).Debug("Couldn't send repsonse to Worker")
+
+								}
+							}
+						}
 
 					}
 				}()
