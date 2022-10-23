@@ -98,7 +98,7 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 	return fangEngineRestApiMessageValues, err
 }
 
-func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct) (err error) {
+func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct) (restResponse *http.Response, err error) {
 	fmt.Println("2. Performing Http Post...")
 
 	common_config.Logger.WithFields(logrus.Fields{
@@ -164,18 +164,18 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 	fangEngineUrl = common_config.CAEngineAddress + fangEngineUrl
 
 	// Do RestCall to FangEngine
-	resp, err := http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(jsonBodyAsString)))
+	restResponse, err = http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(jsonBodyAsString)))
 	if err != nil {
 		common_config.Logger.WithFields(logrus.Fields{
 			"id": "b98c2fb4-e717-4fc4-8d2c-6c791c523175",
 			"common_config.CAEngineAddress + common_config.CAEngineAddressPath": common_config.CAEngineAddress + common_config.CAEngineAddressPath,
 		}).Error("Couldn't do call to Custody Arrangements Rest-execution-server")
 
-		return err
+		return restResponse, err
 	}
 
-	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+	defer restResponse.Body.Close()
+	bodyBytes, _ := ioutil.ReadAll(restResponse.Body)
 
 	// Convert response body to string
 	bodyString := string(bodyBytes)
@@ -186,5 +186,5 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 	//json.Unmarshal(bodyBytes, &todoStruct)
 	//fmt.Printf("%+v\n", todoStruct)
 
-	return err
+	return restResponse, err
 }
