@@ -28,4 +28,5 @@ var (
 	GCPAuthentication                 bool
 	CAEngineAddress                   string
 	CAEngineAddressPath               string
+	UseInternalWebServerForTest       bool
 )

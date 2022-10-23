@@ -8,3 +8,5 @@ var highestExecutionWorkerProtoFileVersion int32 = -1
 
 // Logger that all part of the system can use
 var Logger *logrus.Logger
+
+const LocalWebServerAddressAndPort = ":8080"

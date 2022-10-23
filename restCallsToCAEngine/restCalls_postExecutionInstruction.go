@@ -161,7 +161,15 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 		"/" + string(fangEngineRestApiMessageValues.FangEngineMethodNameNAME) +
 		"?" + "expectedToBePassed=" + string(fangEngineRestApiMessageValues.FangEngineExpectedToBePassedValue)
 
-	fangEngineUrl = common_config.CAEngineAddress + fangEngineUrl
+	// Use Local web server for test or FangEngine
+	if common_config.UseInternalWebServerForTest == true {
+		// Use Local web server for testing
+		fangEngineUrl = common_config.LocalWebServerAddressAndPort + fangEngineUrl
+
+	} else {
+		// Use FangEngine
+		fangEngineUrl = common_config.CAEngineAddress + fangEngineUrl
+	}
 
 	// Do RestCall to FangEngine
 	restResponse, err = http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(jsonBodyAsString)))

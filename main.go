@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"net/http"
 	"os/signal"
 	"strconv"
 	"syscall"
@@ -131,6 +132,40 @@ func main() {
 
 	// InitiateRestCallsToCAEngine()
 	restCallsToCAEngine.InitiateRestCallsToCAEngine()
+
+	// If local web server, used for testing, should be used instead of FangEngine
+	if common_config.UseInternalWebServerForTest == true {
+
+		common_config.Logger.WithFields(logrus.Fields{
+			"id": "353930b1-5c6f-4826-955c-19f543e2ab85",
+		}).Info("Using internal web server instead of FangEngine, for RestCall")
+
+		go func() {
+			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+					return
+				}
+
+				//user := &Person{}
+				/*
+					err := json.NewDecoder(r.Body).Decode(user)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusBadRequest)
+						return
+					}
+
+				*/
+
+				fmt.Println("got r.Body:", r.Body)
+				w.WriteHeader(http.StatusOK)
+			})
+
+			if err := http.ListenAndServe(common_config.LocalWebServerAddressAndPort, nil); err != http.ErrServerClosed {
+				panic(err)
+			}
+		}()
+	}
 
 	// Start Connector Engine
 	go fenixExecutionConnectorMain()
@@ -332,5 +367,13 @@ func init() {
 	// Extract Address to Custody Arrangement Rest-Engine
 	common_config.CAEngineAddress = mustGetenv("CAEngineAddress")
 	common_config.CAEngineAddressPath = mustGetenv("CAEngineAddressPath")
+
+	// Extract if local web server for test should be used instead of FangEngine
+	boolValue, err = strconv.ParseBool(mustGetenv("UseInternalWebServerForTest"))
+	if err != nil {
+		fmt.Println("Couldn't convert environment variable 'UseInternalWebServerForTest:' to an boolean, error: ", err)
+		os.Exit(0)
+	}
+	common_config.UseInternalWebServerForTest = boolValue
 
 }
