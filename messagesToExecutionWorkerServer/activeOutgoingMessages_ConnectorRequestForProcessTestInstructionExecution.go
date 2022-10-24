@@ -159,21 +159,13 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 					}
 
 					// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
-					couldSend, _ := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
+					couldSend, returnMessage := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
 
-					// If response could be sent back to Worker then execute TestInstruction
-					if couldSend == true {
-
-						// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
-						couldSend, returnMessage := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
-
-						if couldSend == false {
-							common_config.Logger.WithFields(logrus.Fields{
-								"ID":            "95dddb21-0895-4016-9cb5-97ab4568f30b",
-								"returnMessage": returnMessage,
-							}).Error("Couldn't send response to Worker")
-
-						}
+					if couldSend == false {
+						common_config.Logger.WithFields(logrus.Fields{
+							"ID":            "95dddb21-0895-4016-9cb5-97ab4568f30b",
+							"returnMessage": returnMessage,
+						}).Error("Couldn't send response to Worker")
 
 					} else {
 
@@ -229,7 +221,6 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 								"returnMessage": returnMessage,
 							}).Error("Couldn't send repsonse to Worker")
 						}
-
 					}
 				}()
 

@@ -6,8 +6,8 @@ require (
 	fyne.io/fyne/v2 v2.2.3
 	github.com/gorilla/pat v1.0.1
 	github.com/gorilla/sessions v1.2.1
-	github.com/jlambert68/FenixGrpcApi v0.0.0-20221006075932-f3652b179e7c
-	github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221021175141-a01dda419d01
+	github.com/jlambert68/FenixGrpcApi v0.0.0-20221024132730-198d27465688
+	github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221024131758-9af469ea9581
 	github.com/markbates/goth v1.73.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/toqueteos/webbrowser v1.2.0
@@ -52,7 +52,7 @@ require (
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220624142145-8cd45d7dbd1f // indirect
+	google.golang.org/genproto v0.0.0-20221010155953-15ba04fc1c0e // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )

@@ -4,6 +4,7 @@ import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
 	"FenixCAConnector/restCallsToCAEngine"
+	"encoding/json"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -13,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
+	"io/ioutil"
 	"net/http"
 	"os/signal"
 	"strconv"
@@ -99,6 +101,18 @@ var (
 	caEngineAddressPath             string
 )
 
+func dumpMap(space string, m map[string]interface{}) {
+	for k, v := range m {
+		if mv, ok := v.(map[string]interface{}); ok {
+			fmt.Printf("{ \"%v\": \n", k)
+			dumpMap(space+"\t", mv)
+			fmt.Printf("}\n")
+		} else {
+			fmt.Printf("%v %v : %v\n", space, k, v)
+		}
+	}
+}
+
 func main() {
 
 	var logFileName string
@@ -141,23 +155,60 @@ func main() {
 		}).Info("Using internal web server instead of FangEngine, for RestCall")
 
 		go func() {
+			type jsonType string
+
 			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
 					http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 					return
 				}
 
-				//user := &Person{}
+				fmt.Println("got r.Body:", r.Body)
+
+				// read response body
+				body, error := ioutil.ReadAll(r.Body)
+				if error != nil {
+					fmt.Println(error)
+				}
+				// close response body
+				r.Body.Close()
+
+				var myjson jsonType
+
+				jsonMap := make(map[string]interface{})
+				err := json.Unmarshal(body, &jsonMap)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				fmt.Println(jsonMap)
 				/*
-					err := json.NewDecoder(r.Body).Decode(user)
+					err := json.NewDecoder(r.Body).Decode(myjson)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusBadRequest)
 						return
 					}
 
-				*/
 
+				*/
+				/*
+						jsonMap := make(map[string]interface{})
+						err := json.Unmarshal([]byte(jsonStr), &jsonMap)
+						if err != nil {
+							panic(err)
+						}
+						dumpMap("", jsonMap)
+
+
+
+					var data map[string]interface{}
+					err := json.Unmarshal([]byte(r.body), &data)
+					if err != nil {
+						fmt.Println("Couldn't Unmarshal Rest-body")
+					}
+				*/
 				fmt.Println("got r.Body:", r.Body)
+				fmt.Println("myjson:", myjson)
 				w.WriteHeader(http.StatusOK)
 			})
 
@@ -182,7 +233,7 @@ func main() {
 			m := fyne.NewMenu("Fenix Execution Connector",
 				fyne.NewMenuItem("Hide", func() {
 					mainFyneWindow.Hide()
-					newNotification := fyne.NewNotification("MyTitle", "MyCOntent")
+					newNotification := fyne.NewNotification("Fenix Execution Connector", "Fenix will rule the 'Test World'")
 
 					a.SendNotification(newNotification)
 				}))
@@ -222,7 +273,7 @@ func main() {
 
 				mainFyneWindow.Hide()
 
-				time.Sleep(time.Second * 6)
+				time.Sleep(time.Second * 7)
 				splashWindow.Close()
 
 			}()
