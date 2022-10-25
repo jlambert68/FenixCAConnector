@@ -66,6 +66,9 @@ func mustGetenv(environmentVariableName string) string {
 		case "CAEngineAddressPath":
 			environmentVariable = caEngineAddressPath
 
+		case "UseInternalWebServerForTest":
+			environmentVariable = useInternalWebServerForTest
+
 		default:
 			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
 
@@ -99,6 +102,7 @@ var (
 	gcpAuthentication               string
 	caEngineAddress                 string
 	caEngineAddressPath             string
+	useInternalWebServerForTest     string
 )
 
 func dumpMap(space string, m map[string]interface{}) {
