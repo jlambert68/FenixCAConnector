@@ -27,7 +27,7 @@ const (
 	ChannelCommandTriggerReportCurrentTestInstructionExecutionResult
 	ChannelCommandTriggerSendAllLogPostForExecution
 	ChannelCommandTriggerRequestForTestInstructionExecutionToProcess
-	ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Minutes
+	ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Seconds
 )
 
 type ChannelCommandStruct struct {

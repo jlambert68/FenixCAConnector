@@ -39,22 +39,24 @@ func RestAPIServer() {
 	router.UseEncodedPath()
 	log.Println("creating routes")
 	//specify endpoints
+
 	router.HandleFunc("/health-check", healthCheck).Methods("GET")
 	router.HandleFunc("/ExampleTestStepClass/DoSomething", doSomething).Methods("POST")
+	router.HandleFunc("/TestCaseExecution/ExecuteTestActionMethod/SettlementAgreement/Edit", settlementAgreementEdit).Methods("POST")
+	router.HandleFunc("/TestCaseExecution/ExecuteTestActionMethod/SettlementAgreement/AddSelectedSwift", settlementAgreementAddSelectedSwift).Methods("POST")
 	router.NotFoundHandler = http.HandlerFunc(notFound)
 	//router.HandleFunc("/*", allOtherRoutes).Methods("POST")
 	/*
-		router.HandleFunc("/ExampleTestStepClass/DoSomething1{expectedToPass}", doSomething1).Methods("POST")
-		router.HandleFunc("/ExampleTestStepClass/DoSomething2{expectedToPass}", doSomething2).Methods("POST")
-		router.HandleFunc("/ExampleTestStepClass/DoSomethingWithTestException{expectedToPass}", doSomethingWithTestException).Methods("POST")
-		router.HandleFunc("/ExampleTestStepClass/DoSomethingWithException{expectedToPass}", doSomethingWithException).Methods("POST")
+		router.HandleFunc("/ExampleTestStepClass/DoSomething1{expectedToBePassed}", doSomething1).Methods("POST")
+		router.HandleFunc("/ExampleTestStepClass/DoSomething2{expectedToBePassed}", doSomething2).Methods("POST")
+		router.HandleFunc("/ExampleTestStepClass/DoSomethingWithTestException{expectedToBePassed}", doSomethingWithTestException).Methods("POST")
+		router.HandleFunc("/ExampleTestStepClass/DoSomethingWithException{expectedToBePassed}", doSomethingWithException).Methods("POST")
 	*/
 
 	http.Handle("/", router)
 
 	//start and listen to requests
 	http.ListenAndServe(":8080", router)
-
 }
 
 // RestApi to check if local TestWeb-server is up and running
@@ -129,13 +131,8 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func doSomething(w http.ResponseWriter, r *http.Request) {
-	// curl --request POST localhost:8080/pinned-testinstructions-and-testinstructioncontainers/s41797
-	/*
-		curl -X POST localhost:8080/pinned-testinstructions-and-testinstructioncontainers \
-		-H 'Content-Type: application/json' \
-		-d '{"UserId":"s41797","PinnedTestInstructionMessages":[{"TestInstructionUuid":"2f130d7e-f8aa-466f-b29d-0fb63608c1a6","TestInstructionName":"TestInstructionName 1"}],"PinnedTestInstructionContainerMessages":[{"TestInstructionContainerUuid":"b107bdd9-4152-4020-b3f0-fc750b45885e","TestInstructionContainerName":"TestInstructionContainerName 1"},{"TestInstructionContainerUuid":"e81b9734-5dce-43c9-8d77-3368940cf126","TestInstructionContainerName":"TestInstructionContainerName"}]}'
-	*/
-	// curl -X POST localhost:8080/pinned-testinstructions-and-testinstructioncontainers -H 'Content-Type: application/json' -d '{"UserId":"s41797","PinnedTestInstructionMessages":[{"TestInstructionUuid":"myUuid", "TestInstructionName":"myName"}],"PinnedTestInstructionContainerMessages":[{"TestInstructionContainerUuid":"myUuid2", "TestInstructionContainerName":"myName2"}]}'
+
+	// curl -X POST localhost:8080/ExampleTestStepClass/DoSomething?expectedToBePassed=true -H 'Content-Type: application/json' -d '{"UserId":"s41797", "TestInstructionUuid":"myUuid", "TestInstructionName":"myName"}'
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"id": "2472dda1-701d-4b23-8326-757e43df4af4",
@@ -170,11 +167,11 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract 'expectedToPassSlice'
+	// Extract 'expectedToBePassedSlice'
 	variables := r.URL.Query() //mux.Vars(r)
-	expectedToPassSlice, existInMap := variables["expectedToPass"]
+	expectedToBePassedSlice, existInMap := variables["expectedToBePassed"]
 
-	// Missing parameter 'expectedToPassSlice'
+	// Missing parameter 'expectedToBePassedSlice'
 	if existInMap == false {
 
 		// Create Header
@@ -184,7 +181,7 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		// Create Response message
 		responseBody["title"] = "Error - Bad Request"
 		responseBody["status"] = "400"
-		responseBody["detail"] = "Missing parameter 'expectedToPass'"
+		responseBody["detail"] = "Missing parameter 'expectedToBePassed'"
 		responseBody["traceId"] = "15f7f628-c80e-4010-8853-66df1ffa1a59"
 
 		responseBodydata, _ := json.Marshal(responseBody)
@@ -194,13 +191,13 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Exact one parameter 'expectedToPass' must exist
-	if len(expectedToPassSlice) != 1 {
+	// Exact one parameter 'expectedToBePassed' must exist
+	if len(expectedToBePassedSlice) != 1 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 
 		// Create Response message
-		fmt.Fprintf(w, "Parameter 'expectedToPass' must contain exactly one value")
+		fmt.Fprintf(w, "Parameter 'expectedToBePassed' must contain exactly one value")
 
 		// Create Header
 		w.Header().Set("Content-Type", "application/json")
@@ -209,7 +206,7 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		// Create Response message
 		responseBody["title"] = "Error - Bad Request"
 		responseBody["status"] = "400"
-		responseBody["detail"] = "Parameter 'expectedToPass' must contain exactly one value"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' must contain exactly one value"
 		responseBody["traceId"] = "dcdfc951-1eb5-4ed9-8c54-5f22bb718ae7"
 
 		responseBodydata, _ := json.Marshal(responseBody)
@@ -219,8 +216,8 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parameter 'expectedToPass' should be 'true' or 'false'
-	if expectedToPassSlice[0] != "true" && expectedToPassSlice[0] != "false" {
+	// Parameter 'expectedToBePassed' should be 'true' or 'false'
+	if expectedToBePassedSlice[0] != "true" && expectedToBePassedSlice[0] != "false" {
 
 		// Create Header
 		w.Header().Set("Content-Type", "application/json")
@@ -229,7 +226,7 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		// Create Response message
 		responseBody["title"] = "Error - Bad Request"
 		responseBody["status"] = "400"
-		responseBody["detail"] = "Parameter 'expectedToPass' should be 'true' or 'false'"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' should be 'true' or 'false'"
 		responseBody["traceId"] = "2c82ed7f-18f6-4362-8ca7-a4c3602d81ac"
 
 		responseBodydata, _ := json.Marshal(responseBody)
@@ -239,8 +236,8 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 'expectedToPass' should be 'true'
-	if expectedToPassSlice[0] == "true" {
+	// 'expectedToBePassed' should be 'true'
+	if expectedToBePassedSlice[0] == "true" {
 
 		// Create Header
 		w.Header().Set("Content-Type", "application/json")
@@ -260,8 +257,8 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	// 'expectedToPass' is 'false' - Will allways go in here
-	if expectedToPassSlice[0] == "false" {
+	// 'expectedToBePassed' is 'false' - Will allways go in here
+	if expectedToBePassedSlice[0] == "false" {
 
 		// Create Header
 		w.Header().Set("Content-Type", "application/json")
@@ -274,6 +271,313 @@ func doSomething(w http.ResponseWriter, r *http.Request) {
 		responseBody["status"] = "500"
 		responseBody["detail"] = "Not a OK Test from Test Web server"
 		responseBody["traceId"] = "7f139cbd-2fb2-4ba2-9f8b-4d42faefc69f"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+	}
+}
+
+func settlementAgreementEdit(w http.ResponseWriter, r *http.Request) {
+
+	// curl -X POST localhost:8080/SettlementAgreement/Edit?expectedToBePassed=true -H 'Content-Type: application/json' -d '{"UserId":"s41797", "TestInstructionUuid":"myUuid", "TestInstructionName":"myName"}'
+
+	common_config.Logger.WithFields(logrus.Fields{
+		"id": "c779ceda-224c-4eb2-9db4-c45f041990f8",
+	}).Debug("Incoming 'RestApi - (POST) /SettlementAgreement/Edit")
+
+	defer common_config.Logger.WithFields(logrus.Fields{
+		"id": "95dbfb47-d178-4008-9df2-eeaa9a403650",
+	}).Debug("Outgoing 'RestApi - (POST) /SettlementAgreement/Edit'")
+
+	// Variable where Rest-json-payload will end up in
+	//jsonData := &RestSavePinnedInstructionsAndTestInstructionContainersToFenixGuiBuilderServerStruct{}
+
+	// Create base for response body
+	var responseBody map[string]string
+	responseBody = make(map[string]string)
+	responseBody["type"] = "FenixCAConnector - internal Web Server"
+
+	// read message body
+	body, error := ioutil.ReadAll(r.Body)
+	if error != nil {
+		fmt.Println(error)
+		return
+	}
+
+	// close message body
+	r.Body.Close()
+
+	jsonMap := make(map[string]interface{})
+	err := json.Unmarshal(body, &jsonMap)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		// Just print Incoming parameter
+		common_config.Logger.WithFields(logrus.Fields{
+			"id":      "39b69687-02f4-477d-a80d-2091369fed88",
+			"jsonMap": jsonMap,
+		}).Debug("Incoming Parameters")
+	}
+
+	// Extract 'expectedToBePassedSlice'
+	variables := r.URL.Query() //mux.Vars(r)
+	expectedToBePassedSlice, existInMap := variables["expectedToBePassed"]
+
+	// Missing parameter 'expectedToBePassedSlice'
+	if existInMap == false {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Missing parameter 'expectedToBePassed'"
+		responseBody["traceId"] = "f7220bf2-aebe-43e3-bafe-c22bc388e2ca"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// Exact one parameter 'expectedToBePassed' must exist
+	if len(expectedToBePassedSlice) != 1 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		fmt.Fprintf(w, "Parameter 'expectedToBePassed' must contain exactly one value")
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' must contain exactly one value"
+		responseBody["traceId"] = "63110ca8-4666-4f13-861b-8bf3289bf6fe"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// Parameter 'expectedToBePassed' should be 'true' or 'false'
+	if expectedToBePassedSlice[0] != "true" && expectedToBePassedSlice[0] != "false" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' should be 'true' or 'false'"
+		responseBody["traceId"] = "6f728526-ba60-4246-9622-5eb4bf0bd5a0"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// 'expectedToBePassed' should be 'true'
+	if expectedToBePassedSlice[0] == "true" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Create Response message
+		responseBody["title"] = "OK"
+		responseBody["status"] = "200"
+		responseBody["detail"] = "OK Test from Test Web server"
+		responseBody["traceId"] = "b28162c8-d606-491b-a72c-5d7377835cdc"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+
+	}
+
+	// 'expectedToBePassed' is 'false' - Will allways go in here
+	if expectedToBePassedSlice[0] == "false" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError) //TODO Fang must change this
+
+		// Create Response message
+		fmt.Fprintf(w, "Not a OK Test from Test Web server")
+		// Create Response message
+		responseBody["title"] = "Error - Internal Server Error"
+		responseBody["status"] = "500"
+		responseBody["detail"] = "Not a OK Test from Test Web server"
+		responseBody["traceId"] = "7f139cbd-2fb2-4ba2-9f8b-4d42faefc69f"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+	}
+}
+
+func settlementAgreementAddSelectedSwift(w http.ResponseWriter, r *http.Request) {
+
+	// curl -X POST localhost:8080/SettlementAgreement/Edit?expectedToBePassed=true -H 'Content-Type: application/json' -d '{"UserId":"s41797", "TestInstructionUuid":"myUuid", "TestInstructionName":"myName"}'
+
+	common_config.Logger.WithFields(logrus.Fields{
+		"id": "e1f6692c-b026-4a39-9d4d-842978af3008",
+	}).Debug("Incoming 'RestApi - (POST) /SettlementAgreement/AddSelectedSwift")
+
+	defer common_config.Logger.WithFields(logrus.Fields{
+		"id": "a2c7c687-9974-4520-964c-08ff87908361",
+	}).Debug("Outgoing 'RestApi - (POST) /SettlementAgreement/AddSelectedSwift")
+
+	// Create base for response body
+	var responseBody map[string]string
+	responseBody = make(map[string]string)
+	responseBody["type"] = "FenixCAConnector - internal Web Server"
+
+	// read message body
+	body, error := ioutil.ReadAll(r.Body)
+	if error != nil {
+		fmt.Println(error)
+		return
+	}
+
+	// close message body
+	r.Body.Close()
+
+	jsonMap := make(map[string]interface{})
+	err := json.Unmarshal(body, &jsonMap)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		// Just print Incoming parameter
+		common_config.Logger.WithFields(logrus.Fields{
+			"id":      "14abc200-b199-4c6d-8996-fd8dbcd94cc6",
+			"jsonMap": jsonMap,
+		}).Debug("Incoming Parameters")
+	}
+
+	// Extract 'expectedToBePassedSlice'
+	variables := r.URL.Query() //mux.Vars(r)
+	expectedToBePassedSlice, existInMap := variables["expectedToBePassed"]
+
+	// Missing parameter 'expectedToBePassedSlice'
+	if existInMap == false {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Missing parameter 'expectedToBePassed'"
+		responseBody["traceId"] = "098096a2-3767-46e9-9191-64a62326af9f"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// Exact one parameter 'expectedToBePassed' must exist
+	if len(expectedToBePassedSlice) != 1 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		fmt.Fprintf(w, "Parameter 'expectedToBePassed' must contain exactly one value")
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' must contain exactly one value"
+		responseBody["traceId"] = "bafbbcc8-2f9c-46c2-85fe-3cfd40224044"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// Parameter 'expectedToBePassed' should be 'true' or 'false'
+	if expectedToBePassedSlice[0] != "true" && expectedToBePassedSlice[0] != "false" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		// Create Response message
+		responseBody["title"] = "Error - Bad Request"
+		responseBody["status"] = "400"
+		responseBody["detail"] = "Parameter 'expectedToBePassed' should be 'true' or 'false'"
+		responseBody["traceId"] = "8b990687-5bc2-4aec-a9a9-f6456d36bb1a"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+	}
+
+	// 'expectedToBePassed' should be 'true'
+	if expectedToBePassedSlice[0] == "true" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Create Response message
+		responseBody["title"] = "OK"
+		responseBody["status"] = "200"
+		responseBody["detail"] = "OK Test from Test Web server"
+		responseBody["traceId"] = "2d16e9ac-09a2-4076-a9ba-e3cb48171807"
+
+		responseBodydata, _ := json.Marshal(responseBody)
+
+		fmt.Fprintf(w, string(responseBodydata))
+
+		return
+
+	}
+
+	// 'expectedToBePassed' is 'false' - Will allways go in here
+	if expectedToBePassedSlice[0] == "false" {
+
+		// Create Header
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError) //TODO Fang must change this
+
+		// Create Response message
+		fmt.Fprintf(w, "Not a OK Test from Test Web server")
+		// Create Response message
+		responseBody["title"] = "Error - Internal Server Error"
+		responseBody["status"] = "500"
+		responseBody["detail"] = "Not a OK Test from Test Web server"
+		responseBody["traceId"] = "c3f58dd0-aa37-4174-92fd-526ded639a9f"
 
 		responseBodydata, _ := json.Marshal(responseBody)
 

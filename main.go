@@ -159,85 +159,11 @@ func main() {
 			"id": "353930b1-5c6f-4826-955c-19f543e2ab85",
 		}).Info("Using internal web server instead of FangEngine, for RestCall")
 
+		// Run local test web server in a go-routine
 		go func() {
-
 			restCallsToCAEngine.RestAPIServer()
-			/*
-
-				type jsonType string
-
-				http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-					if r.Method != http.MethodPost {
-						http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-						return
-					}
-
-					fmt.Println("got r.Body:", r.Body)
-
-					// read response body
-					body, error := ioutil.ReadAll(r.Body)
-					if error != nil {
-						fmt.Println(error)
-					}
-					// close response body
-					r.Body.Close()
-
-					var myjson jsonType
-
-					jsonMap := make(map[string]interface{})
-					err := json.Unmarshal(body, &jsonMap)
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusBadRequest)
-						return
-					}
-					fmt.Println(jsonMap)
-
-					fmt.Println("got r.Body:", r.Body)
-					fmt.Println("myjson:", myjson)
-					w.WriteHeader(http.StatusOK)
-
-
-			*/
-
-			// ***************************************
-			/*
-						err := json.NewDecoder(r.Body).Decode(myjson)
-						if err != nil {
-							http.Error(w, err.Error(), http.StatusBadRequest)
-							return
-						}
-
-
-
-					/*
-							jsonMap := make(map[string]interface{})
-							err := json.Unmarshal([]byte(jsonStr), &jsonMap)
-							if err != nil {
-								panic(err)
-							}
-							dumpMap("", jsonMap)
-
-
-
-						var data map[string]interface{}
-						err := json.Unmarshal([]byte(r.body), &data)
-						if err != nil {
-							fmt.Println("Couldn't Unmarshal Rest-body")
-						}
-
-					fmt.Println("got r.Body:", r.Body)
-					fmt.Println("myjson:", myjson)
-					w.WriteHeader(http.StatusOK)
-
-
-				})
-
-			*/
-
-			//if err := http.ListenAndServe(common_config.LocalWebServerAddressAndPort, nil); err != http.ErrServerClosed {
-			//	panic(err)
-			//}
 		}()
+
 	}
 
 	// Start Connector Engine

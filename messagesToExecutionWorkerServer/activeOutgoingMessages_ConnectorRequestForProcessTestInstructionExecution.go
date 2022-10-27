@@ -173,6 +173,31 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 						var restResponse *http.Response
 						restResponse, err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
 
+						//**************
+						/*
+							defer restResponse.Body.Close()
+							bodyBytes, _ := ioutil.ReadAll(restResponse.Body)
+
+							jsonMap := make(map[string]interface{})
+							err = json.Unmarshal(bodyBytes, &jsonMap)
+							if err != nil {
+								http.Error(w, err.Error(), http.StatusBadRequest)
+								return
+							}
+
+							// Convert response body to string
+							bodyString := string(bodyBytes)
+							fmt.Println(bodyString)
+
+							// Convert response body to Todo struct
+							//var todoStruct Todo
+							//json.Unmarshal(bodyBytes, &todoStruct)
+							//fmt.Printf("%+v\n", todoStruct)
+
+
+						*/
+						//*********************
+
 						// Convert response from restCall into 'Fenix-world-data'
 						var testInstructionExecutionStatus fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum
 						if err != nil {
@@ -233,6 +258,6 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	<-done
 	common_config.Logger.WithFields(logrus.Fields{
 		"ID": "0b5fdb7c-91aa-4dfc-b587-7b6cef83d224",
-	}).Debug("Server stopped sending so reconnect again in 5 minutes")
+	}).Debug("Server stopped sending so reconnect again in 5 seconds")
 
 }

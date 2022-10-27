@@ -11,7 +11,6 @@ import (
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/CustodyArrangement/TestInstructions"
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/TypeAndStructs"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -141,7 +140,7 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 		}'
 	*/
 	var fangEngineUrl string
-	fangEngineUrl = "/TestCaseExecution/ExecuteTestActionMethod/" + string(fangEngineRestApiMessageValues.FangEngineClassNameNAME) +
+	fangEngineUrl = common_config.CAEngineAddressPath + "/" + string(fangEngineRestApiMessageValues.FangEngineClassNameNAME) +
 		"/" + string(fangEngineRestApiMessageValues.FangEngineMethodNameNAME) +
 		"?" + "expectedToBePassed=" + string(fangEngineRestApiMessageValues.FangEngineExpectedToBePassedValue)
 
@@ -159,24 +158,12 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 	restResponse, err = http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(attributesAsJson)))
 	if err != nil {
 		common_config.Logger.WithFields(logrus.Fields{
-			"id": "b98c2fb4-e717-4fc4-8d2c-6c791c523175",
-			"common_config.CAEngineAddress + common_config.CAEngineAddressPath": common_config.CAEngineAddress + common_config.CAEngineAddressPath,
-		}).Error("Couldn't do call to Custody Arrangements Rest-execution-server")
+			"id":            "b98c2fb4-e717-4fc4-8d2c-6c791c523175",
+			"fangEngineUrl": fangEngineUrl,
+		}).Error("Couldn't do call to Rest-execution-server")
 
 		return restResponse, err
 	}
-
-	defer restResponse.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(restResponse.Body)
-
-	// Convert response body to string
-	bodyString := string(bodyBytes)
-	fmt.Println(bodyString)
-
-	// Convert response body to Todo struct
-	//var todoStruct Todo
-	//json.Unmarshal(bodyBytes, &todoStruct)
-	//fmt.Printf("%+v\n", todoStruct)
 
 	return restResponse, err
 }
