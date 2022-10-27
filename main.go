@@ -4,7 +4,6 @@ import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
 	"FenixCAConnector/restCallsToCAEngine"
-	"encoding/json"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -14,8 +13,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-	"io/ioutil"
-	"net/http"
 	"os/signal"
 	"strconv"
 	"syscall"
@@ -69,6 +66,9 @@ func mustGetenv(environmentVariableName string) string {
 		case "UseInternalWebServerForTest":
 			environmentVariable = useInternalWebServerForTest
 
+		case "UseServiceAccount":
+			environmentVariable = useServiceAccount
+
 		default:
 			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
 
@@ -103,6 +103,7 @@ var (
 	caEngineAddress                 string
 	caEngineAddressPath             string
 	useInternalWebServerForTest     string
+	useServiceAccount               string
 )
 
 func dumpMap(space string, m map[string]interface{}) {
@@ -141,7 +142,7 @@ func main() {
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 		// Generate first time Access token
-		_, returnMessageAckNack, returnMessageString := gcp.Gcp.GenerateGCPAccessTokenForAuthorizedUser(ctx)
+		_, returnMessageAckNack, returnMessageString := gcp.Gcp.GenerateGCPAccessToken(ctx)
 		if returnMessageAckNack == false {
 			// If there was any problem then exit program
 			log.Fatalf(fmt.Sprintln("Couldn't generate access token for GCP, return message: '%s'", returnMessageString))
@@ -159,66 +160,83 @@ func main() {
 		}).Info("Using internal web server instead of FangEngine, for RestCall")
 
 		go func() {
-			type jsonType string
 
-			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodPost {
-					http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-					return
-				}
+			restCallsToCAEngine.RestAPIServer()
+			/*
 
-				fmt.Println("got r.Body:", r.Body)
+				type jsonType string
 
-				// read response body
-				body, error := ioutil.ReadAll(r.Body)
-				if error != nil {
-					fmt.Println(error)
-				}
-				// close response body
-				r.Body.Close()
+				http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+					if r.Method != http.MethodPost {
+						http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+						return
+					}
 
-				var myjson jsonType
+					fmt.Println("got r.Body:", r.Body)
 
-				jsonMap := make(map[string]interface{})
-				err := json.Unmarshal(body, &jsonMap)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusBadRequest)
-					return
-				}
-				fmt.Println(jsonMap)
-				/*
-					err := json.NewDecoder(r.Body).Decode(myjson)
+					// read response body
+					body, error := ioutil.ReadAll(r.Body)
+					if error != nil {
+						fmt.Println(error)
+					}
+					// close response body
+					r.Body.Close()
+
+					var myjson jsonType
+
+					jsonMap := make(map[string]interface{})
+					err := json.Unmarshal(body, &jsonMap)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusBadRequest)
 						return
 					}
+					fmt.Println(jsonMap)
+
+					fmt.Println("got r.Body:", r.Body)
+					fmt.Println("myjson:", myjson)
+					w.WriteHeader(http.StatusOK)
 
 
-				*/
-				/*
-						jsonMap := make(map[string]interface{})
-						err := json.Unmarshal([]byte(jsonStr), &jsonMap)
+			*/
+
+			// ***************************************
+			/*
+						err := json.NewDecoder(r.Body).Decode(myjson)
 						if err != nil {
-							panic(err)
+							http.Error(w, err.Error(), http.StatusBadRequest)
+							return
 						}
-						dumpMap("", jsonMap)
 
 
 
-					var data map[string]interface{}
-					err := json.Unmarshal([]byte(r.body), &data)
-					if err != nil {
-						fmt.Println("Couldn't Unmarshal Rest-body")
-					}
-				*/
-				fmt.Println("got r.Body:", r.Body)
-				fmt.Println("myjson:", myjson)
-				w.WriteHeader(http.StatusOK)
-			})
+					/*
+							jsonMap := make(map[string]interface{})
+							err := json.Unmarshal([]byte(jsonStr), &jsonMap)
+							if err != nil {
+								panic(err)
+							}
+							dumpMap("", jsonMap)
 
-			if err := http.ListenAndServe(common_config.LocalWebServerAddressAndPort, nil); err != http.ErrServerClosed {
-				panic(err)
-			}
+
+
+						var data map[string]interface{}
+						err := json.Unmarshal([]byte(r.body), &data)
+						if err != nil {
+							fmt.Println("Couldn't Unmarshal Rest-body")
+						}
+
+					fmt.Println("got r.Body:", r.Body)
+					fmt.Println("myjson:", myjson)
+					w.WriteHeader(http.StatusOK)
+
+
+				})
+
+			*/
+
+			//if err := http.ListenAndServe(common_config.LocalWebServerAddressAndPort, nil); err != http.ErrServerClosed {
+			//	panic(err)
+			//}
 		}()
 	}
 
@@ -430,5 +448,17 @@ func init() {
 		os.Exit(0)
 	}
 	common_config.UseInternalWebServerForTest = boolValue
+
+	// Extract Address to Custody Arrangement Rest-Engine
+	common_config.CAEngineAddress = mustGetenv("CAEngineAddress")
+	common_config.CAEngineAddressPath = mustGetenv("CAEngineAddressPath")
+
+	// Extract if Service Account should be used towards GCP or should the user log in via web
+	boolValue, err = strconv.ParseBool(mustGetenv("UseServiceAccount"))
+	if err != nil {
+		fmt.Println("Couldn't convert environment variable 'UseServiceAccount:' to an boolean, error: ", err)
+		os.Exit(0)
+	}
+	common_config.UseServiceAccount = boolValue
 
 }

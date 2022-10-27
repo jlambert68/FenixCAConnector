@@ -29,4 +29,5 @@ var (
 	CAEngineAddress                   string
 	CAEngineAddressPath               string
 	UseInternalWebServerForTest       bool
+	UseServiceAccount                 bool
 )
