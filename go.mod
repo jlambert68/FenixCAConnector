@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/pat v1.0.1
 	github.com/gorilla/sessions v1.2.1
-	github.com/jlambert68/FenixGrpcApi v0.0.0-20221024132730-198d27465688
+	github.com/jlambert68/FenixGrpcApi v0.0.0-20221027184348-9456fafbba2a
 	github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221024131758-9af469ea9581
 	github.com/markbates/goth v1.73.0
 	github.com/sirupsen/logrus v1.9.0

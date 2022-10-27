@@ -3,7 +3,9 @@ package main
 import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
+	"FenixCAConnector/resources"
 	"FenixCAConnector/restCallsToCAEngine"
+	"flag"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -120,13 +122,98 @@ func dumpMap(space string, m map[string]interface{}) {
 
 func main() {
 
+	// Parse flags if there are any. Used to override hard set values from build process
+	flagLoggingLevel := flag.String("flagLoggingLevel", "", "flagLoggingLevel=InfoLevel [expects: 'DebugLevel', 'InfoLevel']")
+	flagRunInTray := flag.String("flagRunInTray", "", "flagRunInTray=xxxxx [expects: 'true', 'false']")
+	flagUseInternalWebServerForTest := flag.String("flagUseInternalWebServerForTest", "", "flagUseInternalWebServerForTest=xxxxx [expects: 'true', 'false']")
+	flagCAEngineAddress := flag.String("flagCAEngineAddress", "", "flagCAEngineAddress=xxxxx [expects: 'http::/<some address to FangEngine>']")
+
+	flag_ldflags := flag.String("ldflags", "", "ldflags should not be used")
+
+	/*
+	   RunInTray:
+	   	true
+	   UseInternalWebServerForTest:
+	   	true
+	   UseServiceAccount:
+	   	true
+
+
+	*/
+	// Parse flags a secure that only expected value are used
+	flag.Parse()
+
+	fmt.Println(*flag_ldflags)
+
+	// Verify flag for 'LoggingLevel'
+
+	switch *flagLoggingLevel {
+
+	case "":
+
+	case "DebugLevel":
+		common_config.LoggingLevel = logrus.DebugLevel
+
+	case "InfoLevel":
+		common_config.LoggingLevel = logrus.InfoLevel
+
+	default:
+		fmt.Println("Unknown loggingLevel: '" + loggingLevel + "'. Expected one of the following: 'DebugLevel', 'InfoLevel'")
+		os.Exit(0)
+	}
+
+	// Verify flag for 'RunInTray '
+	switch *flagRunInTray {
+
+	case "", "true", "false":
+
+	default:
+		fmt.Println("Unknown RunInTray-parameter '" + *flagRunInTray + "'. Expected one of the following: '', 'true', 'false'")
+		os.Exit(0)
+	}
+
+	// Verify flag for 'UseInternalWebServerForTest '
+	switch *flagUseInternalWebServerForTest {
+
+	case "":
+
+	case "true", "false":
+		// Extract if local web server for test should be used instead of FangEngine
+		boolValue, err := strconv.ParseBool(*flagUseInternalWebServerForTest)
+		if err != nil {
+			fmt.Println("Couldn't convert flag variable 'flagUseInternalWebServerForTest:' to an boolean, error: ", err)
+			os.Exit(0)
+		}
+		common_config.UseInternalWebServerForTest = boolValue
+
+	default:
+		fmt.Println("Unknown UseInternalWebServerForTest-parameter '" + *flagRunInTray + "'. Expected one of the following: '', 'true', 'false'")
+		os.Exit(0)
+	}
+
+	// Verify flag for 'CAEngineAddress '
+	switch *flagCAEngineAddress {
+
+	case "":
+
+	default:
+		common_config.CAEngineAddress = *flagCAEngineAddress
+
+	}
+
 	var logFileName string
 
 	// Extract from environment variables if it should run as a tray application or not
-	shouldRunInTray := mustGetenv("RunInTray")
+	var shouldRunInTray string
+	if *flagRunInTray == "" {
+		shouldRunInTray = mustGetenv("RunInTray")
+	} else {
+		shouldRunInTray = *flagRunInTray
+	}
 
 	// When run as Tray application then add log-name
 	if shouldRunInTray == "true" {
+		common_config.ApplicationShouldRunInTray = true
 		logFileName = "fenixConnectorLog.log"
 	} else {
 		logFileName = ""
@@ -174,7 +261,11 @@ func main() {
 		// Start application as TrayApplication
 
 		a := app.NewWithID("FenixCAConnector")
-		a.SetIcon(resourceFenix57Png)
+
+		// Store reference to application, used for turning icon in tray RED/GREEN depending on when there is a connection to Worker
+		common_config.FenixCAConnectorApplicationReference = &a
+
+		a.SetIcon(resources.ResourceFenix83red32x32Png)
 		mainFyneWindow := a.NewWindow("SysTray")
 
 		if desk, ok := a.(desktop.App); ok {
@@ -206,7 +297,7 @@ func main() {
 			halFinney := widget.NewLabel("\"If you want to change the world, don't protest. Write code!\" - Hal Finney (1994)")
 
 			// Fenix picture
-			image := canvas.NewImageFromResource(resourceFenix12Png)
+			image := canvas.NewImageFromResource(resources.ResourceFenix12Png)
 			image.FillMode = canvas.ImageFillOriginal
 
 			// Container holding Header, picture and Footer
@@ -363,10 +454,6 @@ func init() {
 	}
 	common_config.GCPAuthentication = boolValue
 
-	// Extract Address to Custody Arrangement Rest-Engine
-	common_config.CAEngineAddress = mustGetenv("CAEngineAddress")
-	common_config.CAEngineAddressPath = mustGetenv("CAEngineAddressPath")
-
 	// Extract if local web server for test should be used instead of FangEngine
 	boolValue, err = strconv.ParseBool(mustGetenv("UseInternalWebServerForTest"))
 	if err != nil {
@@ -375,7 +462,7 @@ func init() {
 	}
 	common_config.UseInternalWebServerForTest = boolValue
 
-	// Extract Address to Custody Arrangement Rest-Engine
+	// Extract Address, Port and url-path for Custody Arrangement Rest-Engine
 	common_config.CAEngineAddress = mustGetenv("CAEngineAddress")
 	common_config.CAEngineAddressPath = mustGetenv("CAEngineAddressPath")
 

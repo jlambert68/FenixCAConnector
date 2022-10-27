@@ -3,8 +3,10 @@ package messagesToExecutionWorkerServer
 import (
 	"FenixCAConnector/common_config"
 	"FenixCAConnector/gcp"
+	"FenixCAConnector/resources"
 	"FenixCAConnector/restCallsToCAEngine"
 	"context"
+	"fyne.io/fyne/v2"
 	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/Domains"
 	"github.com/sirupsen/logrus"
@@ -79,6 +81,14 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 	// Local channel to decide when Server stopped sending
 	done := make(chan bool)
 
+	// Connection to Worker is up so change Tray icon to "green", BUT ONLY when run as Tray App
+	var myApplication fyne.App
+	if common_config.FenixCAConnectorApplicationReference != nil {
+		myApplication = *common_config.FenixCAConnectorApplicationReference
+		myApplication.SetIcon(resources.ResourceFenix83green32x32Png)
+
+	}
+
 	// Run streamClient receiver as a go-routine
 	go func() {
 		for {
@@ -91,7 +101,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				common_config.Logger.WithFields(logrus.Fields{
 					"ID":  "3439f49f-d7d5-477e-9a6b-cfa5ed355bfe",
 					"err": err,
-				}).Error("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 minutes")
+				}).Error("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 seconds")
 
 				done <- true //close(done)
 				return
@@ -254,8 +264,14 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 		}
 	}()
 
-	// Server stopped sending so reconnect again in 5 minutes
+	// Server stopped sending so reconnect again in 5 seconds
 	<-done
+
+	// Change Tray icon to "red", BUT ONLY when run as Tray App
+	if common_config.FenixCAConnectorApplicationReference != nil {
+		myApplication.SetIcon(resources.ResourceFenix83red32x32Png)
+	}
+
 	common_config.Logger.WithFields(logrus.Fields{
 		"ID": "0b5fdb7c-91aa-4dfc-b587-7b6cef83d224",
 	}).Debug("Server stopped sending so reconnect again in 5 seconds")

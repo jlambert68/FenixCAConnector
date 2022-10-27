@@ -278,8 +278,8 @@ github.com/inconshreveable/log15 v0.0.0-20170622235902-74a0988b5f80/go.mod h1:cO
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jackmordaunt/icns/v2 v2.2.1/go.mod h1:6aYIB9eSzyfHHMKqDf17Xrs1zetQPReAkiUSHzdw4cI=
 github.com/jarcoal/httpmock v0.0.0-20180424175123-9c70cfe4a1da/go.mod h1:ks+b9deReOc7jgqp+e7LuFiCBH6Rm5hL32cLcEAArb4=
-github.com/jlambert68/FenixGrpcApi v0.0.0-20221024132730-198d27465688 h1:nEr7pRnLXpHx1hPHpAFwjjAASgySrhZ9WLDLVOvOR5I=
-github.com/jlambert68/FenixGrpcApi v0.0.0-20221024132730-198d27465688/go.mod h1:W1LBy0KtSSvZ6zaIG1LZ5P5kTK6yzvubjmHUduD773w=
+github.com/jlambert68/FenixGrpcApi v0.0.0-20221027184348-9456fafbba2a h1:Ye7YGpF8aXov/ETvU9EL6yjndkxQPKirO/BjNwnGpus=
+github.com/jlambert68/FenixGrpcApi v0.0.0-20221027184348-9456fafbba2a/go.mod h1:W1LBy0KtSSvZ6zaIG1LZ5P5kTK6yzvubjmHUduD773w=
 github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221024131758-9af469ea9581 h1:it6LEeLVCQjW0g0m9Fw9d2RAalsfdRy8PQVao6b7Hso=
 github.com/jlambert68/FenixTestInstructionsDataAdmin v0.0.0-20221024131758-9af469ea9581/go.mod h1:ePX1+rqqtN1u8AhNl4AKQ+HMiCAHr1IFWa1MwN5i4yc=
 github.com/josephspurrier/goversioninfo v1.4.0/go.mod h1:JWzv5rKQr+MmW+LvM412ToT/IkYDZjaclF2pKDss8IY=

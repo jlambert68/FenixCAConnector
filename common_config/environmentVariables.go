@@ -30,4 +30,5 @@ var (
 	CAEngineAddressPath               string
 	UseInternalWebServerForTest       bool
 	UseServiceAccount                 bool
+	ApplicationShouldRunInTray        bool
 )
