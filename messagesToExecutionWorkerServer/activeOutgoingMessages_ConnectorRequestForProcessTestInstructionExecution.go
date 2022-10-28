@@ -278,6 +278,13 @@ func SendTestInstructionToFangEngineUsingRestCall(fangEngineRestApiMessageValues
 
 			testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
 		}
+
+		common_config.Logger.WithFields(logrus.Fields{
+			"ID":                             "ae004aab-b900-4126-8093-a2be9238b1d7",
+			"restResponse.StatusCode":        restResponse.StatusCode,
+			"fangEngineRestApiMessageValues": fangEngineRestApiMessageValues,
+		}).Debug("Response from doing restCall")
+
 	}
 
 	// Generate response message to Worker
