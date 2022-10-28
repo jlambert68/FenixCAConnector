@@ -61,21 +61,23 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 		sleepDuration := time.Duration(waitTimeInSeconds) * time.Second
 		time.Sleep(sleepDuration)
 
-		// Call Worker to get TestInstructions to Execute
-		executionEngine.MessagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
+		// Call Worker to get TestInstructions to Execute, but only if Worker shouldn't be side steped
+		if common_config.TurnOffCallToWorker == false {
+			executionEngine.MessagesToExecutionWorkerObjectReference.InitiateConnectorRequestForProcessTestInstructionExecution()
 
-		executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = false
+			executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = false
 
-		// Create Message for CommandChannel to retry to connect in 5 minutes
-		triggerTestInstructionExecutionResultMessage := &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}
-		channelCommand := ChannelCommandStruct{
-			ChannelCommand: ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Seconds,
-			ReportCompleteTestInstructionExecutionResultParameter: ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
-				TriggerTestInstructionExecutionResultMessage: triggerTestInstructionExecutionResultMessage},
+			// Create Message for CommandChannel to retry to connect in 5 minutes
+			triggerTestInstructionExecutionResultMessage := &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}
+			channelCommand := ChannelCommandStruct{
+				ChannelCommand: ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Seconds,
+				ReportCompleteTestInstructionExecutionResultParameter: ChannelCommandSendReportCompleteTestInstructionExecutionResultToFenixExecutionServerStruct{
+					TriggerTestInstructionExecutionResultMessage: triggerTestInstructionExecutionResultMessage},
+			}
+
+			// Send message on channel
+			*executionEngine.CommandChannelReference <- channelCommand
 		}
-
-		// Send message on channel
-		*executionEngine.CommandChannelReference <- channelCommand
 
 	}()
 

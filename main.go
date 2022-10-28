@@ -71,6 +71,9 @@ func mustGetenv(environmentVariableName string) string {
 		case "UseServiceAccount":
 			environmentVariable = useServiceAccount
 
+		case "TurnOffCallToWorker":
+			environmentVariable = turnOffCallToWorker
+
 		default:
 			log.Fatalf("Warning: %s environment variable not among injected variables.\n", environmentVariableName)
 
@@ -106,6 +109,7 @@ var (
 	caEngineAddressPath             string
 	useInternalWebServerForTest     string
 	useServiceAccount               string
+	turnOffCallToWorker             string
 )
 
 func dumpMap(space string, m map[string]interface{}) {
@@ -127,6 +131,7 @@ func main() {
 	flagRunInTray := flag.String("flagRunInTray", "", "flagRunInTray=xxxxx [expects: 'true', 'false']")
 	flagUseInternalWebServerForTest := flag.String("flagUseInternalWebServerForTest", "", "flagUseInternalWebServerForTest=xxxxx [expects: 'true', 'false']")
 	flagCAEngineAddress := flag.String("flagCAEngineAddress", "", "flagCAEngineAddress=xxxxx [expects: 'http::/<some address to FangEngine>']")
+	flagTurnOffCallToWorker := flag.String("flagTurnOffCallToWorker", "", "flagTurnOffCallToWorker=xxxxx [expects: 'true', 'false']")
 
 	flag_ldflags := flag.String("ldflags", "", "ldflags should not be used")
 
@@ -187,8 +192,18 @@ func main() {
 		common_config.UseInternalWebServerForTest = boolValue
 
 	default:
-		fmt.Println("Unknown UseInternalWebServerForTest-parameter '" + *flagRunInTray + "'. Expected one of the following: '', 'true', 'false'")
+		fmt.Println("Unknown UseInternalWebServerForTest-parameter '" + *flagUseInternalWebServerForTest + "'. Expected one of the following: '', 'true', 'false'")
 		os.Exit(0)
+	}
+
+	// Verify flag for 'CAEngineAddress '
+	switch *flagCAEngineAddress {
+
+	case "":
+
+	default:
+		common_config.CAEngineAddress = *flagCAEngineAddress
+
 	}
 
 	// Verify flag for 'CAEngineAddress '
@@ -219,11 +234,32 @@ func main() {
 		logFileName = ""
 	}
 
+	// Verify flag for 'TurnOffCallToWorker '
+	switch *flagTurnOffCallToWorker {
+
+	case "":
+
+	case "true", "false":
+		// Extract if Worker should be called for TestInstructions or not
+		boolValue, err := strconv.ParseBool(*flagTurnOffCallToWorker)
+		if err != nil {
+			fmt.Println("Couldn't convert flag variable 'flagTurnOffCallToWorker:' to an boolean, error: ", err)
+			os.Exit(0)
+		}
+		common_config.TurnOffCallToWorker = boolValue
+
+	default:
+		fmt.Println("Unknown TurnOffCallToWorker-parameter '" + *flagTurnOffCallToWorker + "'. Expected one of the following: '', 'true', 'false'")
+		os.Exit(0)
+	}
+
 	// Initiate logger in common_config
 	InitLogger(logFileName)
 
 	// When Execution Worker runs on GCP, then set up access
-	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP && common_config.GCPAuthentication == true {
+	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP &&
+		common_config.GCPAuthentication == true &&
+		common_config.TurnOffCallToWorker == false {
 		gcp.Gcp = gcp.GcpObjectStruct{}
 
 		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
@@ -231,8 +267,12 @@ func main() {
 		// Generate first time Access token
 		_, returnMessageAckNack, returnMessageString := gcp.Gcp.GenerateGCPAccessToken(ctx)
 		if returnMessageAckNack == false {
+
 			// If there was any problem then exit program
-			log.Fatalf(fmt.Sprintln("Couldn't generate access token for GCP, return message: '%s'", returnMessageString))
+			common_config.Logger.WithFields(logrus.Fields{
+				"id": "20c90d94-eef7-4819-ba8c-b7a56a39f995",
+			}).Fatalf("Couldn't generate access token for GCP, return message: '%s'", returnMessageString)
+
 		}
 	}
 
@@ -473,5 +513,13 @@ func init() {
 		os.Exit(0)
 	}
 	common_config.UseServiceAccount = boolValue
+
+	// Extract if there should be calls to ExecutionWorker or not. Used when testing Connector
+	boolValue, err = strconv.ParseBool(mustGetenv("TurnOffCallToWorker"))
+	if err != nil {
+		fmt.Println("Couldn't convert environment variable 'TurnOffCallToWorker:' to an boolean, error: ", err)
+		os.Exit(0)
+	}
+	common_config.TurnOffCallToWorker = boolValue
 
 }

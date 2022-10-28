@@ -31,4 +31,5 @@ var (
 	UseInternalWebServerForTest       bool
 	UseServiceAccount                 bool
 	ApplicationShouldRunInTray        bool
+	TurnOffCallToWorker               bool
 )

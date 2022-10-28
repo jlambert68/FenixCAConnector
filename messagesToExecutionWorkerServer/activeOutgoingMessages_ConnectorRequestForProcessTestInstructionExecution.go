@@ -25,9 +25,18 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 		"id": "c8e7cbdb-46bd-4545-a472-056fff940365",
 	}).Debug("Incoming 'InitiateConnectorRequestForProcessTestInstructionExecution'")
 
-	common_config.Logger.WithFields(logrus.Fields{
+	defer common_config.Logger.WithFields(logrus.Fields{
 		"id": "be16c2a2-4443-4e55-8ad1-9c8478a75e12",
 	}).Debug("Outgoing 'InitiateConnectorRequestForProcessTestInstructionExecution'")
+
+	// Exit if Worker shouldn't be called
+	if common_config.TurnOffCallToWorker == true {
+		common_config.Logger.WithFields(logrus.Fields{
+			"id": "fe86de5d-2b12-423f-a04b-549461816127",
+		}).Debug("Execution Worker shouldn't be called, exit call procedure")
+
+		return
+	}
 
 	var ctx context.Context
 	var returnMessageAckNack bool
