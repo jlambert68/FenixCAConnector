@@ -74,6 +74,51 @@ func GetHighestConnectorProtoFileVersion() int32 {
 	return highestConnectorProtoFileVersion
 }
 
+// IsCallerUsingCorrectWorkerProtoFileVersion ********************************************************************************************************************
+// Check if Caller  is using correct proto-file version, used when Testing locally
+func IsCallerUsingCorrectWorkerProtoFileVersion(callingClientUuid string, usedProtoFileVersion fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum) (returnMessage *fenixExecutionWorkerGrpcApi.AckNackResponse) {
+
+	var callerUseCorrectProtoFileVersion bool
+	var protoFileExpected fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum
+	var protoFileUsed fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum
+
+	protoFileUsed = usedProtoFileVersion
+	protoFileExpected = fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(GetHighestExecutionWorkerProtoFileVersion())
+
+	// Check if correct proto files is used
+	if protoFileExpected == protoFileUsed {
+		callerUseCorrectProtoFileVersion = true
+	} else {
+		callerUseCorrectProtoFileVersion = false
+	}
+
+	// Check if Client is using correct proto files version
+	if callerUseCorrectProtoFileVersion == false {
+		// Not correct proto-file version is used
+
+		// Set Error codes to return message
+		var errorCodes []fenixExecutionWorkerGrpcApi.ErrorCodesEnum
+		var errorCode fenixExecutionWorkerGrpcApi.ErrorCodesEnum
+
+		errorCode = fenixExecutionWorkerGrpcApi.ErrorCodesEnum_ERROR_WRONG_PROTO_FILE_VERSION
+		errorCodes = append(errorCodes, errorCode)
+
+		// Create Return message
+		returnMessage = &fenixExecutionWorkerGrpcApi.AckNackResponse{
+			AckNack:                      false,
+			Comments:                     "Wrong proto file used. Expected: '" + protoFileExpected.String() + "', but got: '" + protoFileUsed.String() + "'",
+			ErrorCodes:                   errorCodes,
+			ProtoFileVersionUsedByClient: protoFileExpected,
+		}
+
+		return returnMessage
+
+	} else {
+		return nil
+	}
+
+}
+
 // GetHighestExecutionWorkerProtoFileVersion
 // Get the highest GetHighestExecutionWorkerProtoFileVersion for Execution Worker
 func GetHighestExecutionWorkerProtoFileVersion() int32 {

@@ -127,46 +127,9 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				go func() {
 
 					// Call 'CA' backend to convert 'TestInstruction' into useful structure later to be used by FangEngine
-
-					var fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct
-					fangEngineRestApiMessageValues, err = restCallsToCAEngine.ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest)
-
-					// Generate response depending on if the 'TestInstruction' could be converted into useful FangEngine-information or not
 					var processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse
-					if err != nil {
-						// Couldn't convert into FangEngine-messageType
-						timeAtDurationEnd := time.Now()
-
-						// Generate response message to Worker, that conversion didn't work out
-						processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
-							AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
-								AckNack:                      false,
-								Comments:                     err.Error(),
-								ErrorCodes:                   nil,
-								ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
-							},
-							TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
-							ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
-							TestInstructionCanBeReExecuted: true,
-						}
-					} else {
-						// Generate duration for Execution:: TODO This is only for test and should be done in another way later
-						executionDuration := time.Minute * 5
-						timeAtDurationEnd := time.Now().Add(executionDuration)
-
-						// Generate OK response message to Worker
-						processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
-							AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
-								AckNack:                      true,
-								Comments:                     "",
-								ErrorCodes:                   nil,
-								ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
-							},
-							TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
-							ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
-							TestInstructionCanBeReExecuted: false,
-						}
-					}
+					var fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct
+					processTestInstructionExecutionReversedResponse, fangEngineRestApiMessageValues = ConvertTestInstructionIntoFangEngineStructure(processTestInstructionExecutionReveredRequest)
 
 					// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
 					couldSend, returnMessage := toExecutionWorkerObject.SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer(processTestInstructionExecutionReversedResponse)
@@ -180,71 +143,8 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 					} else {
 
 						// Send TestInstruction to FangEngine using RestCall
-						var restResponse *http.Response
-						restResponse, err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
-
-						//**************
-						/*
-							defer restResponse.Body.Close()
-							bodyBytes, _ := ioutil.ReadAll(restResponse.Body)
-
-							jsonMap := make(map[string]interface{})
-							err = json.Unmarshal(bodyBytes, &jsonMap)
-							if err != nil {
-								http.Error(w, err.Error(), http.StatusBadRequest)
-								return
-							}
-
-							// Convert response body to string
-							bodyString := string(bodyBytes)
-							fmt.Println(bodyString)
-
-							// Convert response body to Todo struct
-							//var todoStruct Todo
-							//json.Unmarshal(bodyBytes, &todoStruct)
-							//fmt.Printf("%+v\n", todoStruct)
-
-
-						*/
-						//*********************
-
-						// Convert response from restCall into 'Fenix-world-data'
-						var testInstructionExecutionStatus fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum
-						if err != nil {
-							testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
-						} else {
-							switch restResponse.StatusCode {
-							case http.StatusOK: // 200
-								testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_FINISHED_OK
-							case http.StatusBadRequest: // 400 TODO use correct error
-								testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_FINISHED_NOT_OK
-
-							case http.StatusInternalServerError: // 500
-								testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
-
-							default:
-								// Unhandled response code
-
-								common_config.Logger.WithFields(logrus.Fields{
-									"ID":                      "f6d86465-9a3c-4277-9730-929537f1b42b",
-									"restResponse.StatusCode": restResponse.StatusCode,
-								}).Error("Unhandled response from FangEngine")
-
-								testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
-							}
-						}
-
-						// Generate response message to Worker
 						var finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
-						finalTestInstructionExecutionResultMessage = &fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage{
-							ClientSystemIdentification: &fenixExecutionWorkerGrpcApi.ClientSystemIdentificationMessage{
-								DomainUuid:                   string(Domains.DomainUUID_CA),
-								ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
-							},
-							TestInstructionExecutionUuid:         processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
-							TestInstructionExecutionStatus:       testInstructionExecutionStatus,
-							TestInstructionExecutionEndTimeStamp: timestamppb.Now(),
-						}
+						finalTestInstructionExecutionResultMessage = SendTestInstructionToFangEngineUsingRestCall(fangEngineRestApiMessageValues, processTestInstructionExecutionReveredRequest)
 
 						// Send 'ProcessTestInstructionExecutionReversedResponse' back to worker over direct gRPC-call
 						couldSend, returnMessage := toExecutionWorkerObject.SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer(finalTestInstructionExecutionResultMessage)
@@ -276,4 +176,120 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 		"ID": "0b5fdb7c-91aa-4dfc-b587-7b6cef83d224",
 	}).Debug("Server stopped sending so reconnect again in 5 seconds")
 
+}
+
+// Call 'CA' backend to convert 'TestInstruction' into useful structure later to be used by FangEngine
+func ConvertTestInstructionIntoFangEngineStructure(processTestInstructionExecutionReveredRequest *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest) (processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse, fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct) {
+	fangEngineRestApiMessageValues, err := restCallsToCAEngine.ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest)
+
+	// Generate response depending on if the 'TestInstruction' could be converted into useful FangEngine-information or not
+
+	if err != nil {
+		// Couldn't convert into FangEngine-messageType
+		timeAtDurationEnd := time.Now()
+
+		// Generate response message to Worker, that conversion didn't work out
+		processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
+			AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
+				AckNack:                      false,
+				Comments:                     err.Error(),
+				ErrorCodes:                   nil,
+				ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+			},
+			TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+			ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
+			TestInstructionCanBeReExecuted: true,
+		}
+	} else {
+		// Generate duration for Execution:: TODO This is only for test and should be done in another way later
+		executionDuration := time.Minute * 5
+		timeAtDurationEnd := time.Now().Add(executionDuration)
+
+		// Generate OK response message to Worker
+		processTestInstructionExecutionReversedResponse = &fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse{
+			AckNackResponse: &fenixExecutionWorkerGrpcApi.AckNackResponse{
+				AckNack:                      true,
+				Comments:                     "",
+				ErrorCodes:                   nil,
+				ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+			},
+			TestInstructionExecutionUuid:   processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+			ExpectedExecutionDuration:      timestamppb.New(timeAtDurationEnd),
+			TestInstructionCanBeReExecuted: false,
+		}
+	}
+
+	return processTestInstructionExecutionReversedResponse, fangEngineRestApiMessageValues
+
+}
+
+func SendTestInstructionToFangEngineUsingRestCall(fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct, processTestInstructionExecutionReveredRequest *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest) (finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage) {
+	// Send TestInstruction to FangEngine using RestCall
+	var restResponse *http.Response
+	var err error
+	restResponse, err = restCallsToCAEngine.PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues)
+
+	//**************
+	/*
+		defer restResponse.Body.Close()
+		bodyBytes, _ := ioutil.ReadAll(restResponse.Body)
+
+		jsonMap := make(map[string]interface{})
+		err = json.Unmarshal(bodyBytes, &jsonMap)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Convert response body to string
+		bodyString := string(bodyBytes)
+		fmt.Println(bodyString)
+
+		// Convert response body to Todo struct
+		//var todoStruct Todo
+		//json.Unmarshal(bodyBytes, &todoStruct)
+		//fmt.Printf("%+v\n", todoStruct)
+
+
+	*/
+	//*********************
+
+	// Convert response from restCall into 'Fenix-world-data'
+	var testInstructionExecutionStatus fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum
+	if err != nil {
+		testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
+	} else {
+		switch restResponse.StatusCode {
+		case http.StatusOK: // 200
+			testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_FINISHED_OK
+		case http.StatusBadRequest: // 400 TODO use correct error
+			testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_FINISHED_NOT_OK
+
+		case http.StatusInternalServerError: // 500
+			testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
+
+		default:
+			// Unhandled response code
+
+			common_config.Logger.WithFields(logrus.Fields{
+				"ID":                      "f6d86465-9a3c-4277-9730-929537f1b42b",
+				"restResponse.StatusCode": restResponse.StatusCode,
+			}).Error("Unhandled response from FangEngine")
+
+			testInstructionExecutionStatus = fenixExecutionWorkerGrpcApi.TestInstructionExecutionStatusEnum_TIE_UNEXPECTED_INTERRUPTION
+		}
+	}
+
+	// Generate response message to Worker
+	finalTestInstructionExecutionResultMessage = &fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage{
+		ClientSystemIdentification: &fenixExecutionWorkerGrpcApi.ClientSystemIdentificationMessage{
+			DomainUuid:                   string(Domains.DomainUUID_CA),
+			ProtoFileVersionUsedByClient: fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(common_config.GetHighestExecutionWorkerProtoFileVersion()),
+		},
+		TestInstructionExecutionUuid:         processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionExecutionUuid,
+		TestInstructionExecutionStatus:       testInstructionExecutionStatus,
+		TestInstructionExecutionEndTimeStamp: timestamppb.Now(),
+	}
+
+	return finalTestInstructionExecutionResultMessage
 }

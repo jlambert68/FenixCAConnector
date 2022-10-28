@@ -2,60 +2,188 @@ package gRPCServer
 
 import (
 	"FenixCAConnector/common_config"
+	"FenixCAConnector/messagesToExecutionWorkerServer"
+	"FenixCAConnector/restCallsToCAEngine"
 	"context"
+	"encoding/json"
 	fenixExecutionConnectorGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionConnectorGrpcApi/go_grpc_api"
-	"github.com/jlambert68/FenixTestInstructionsDataAdmin/Domains"
+	fenixExecutionWorkerGrpcApi "github.com/jlambert68/FenixGrpcApi/FenixExecutionServer/fenixExecutionWorkerGrpcApi/go_grpc_api"
 	_ "github.com/jlambert68/FenixTestInstructionsDataAdmin/Domains"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// TriggerSendAllLogPostForExecution
-// Trigger Connector to inform Worker of all log posts that have been produced for an execution
-func (s *fenixExecutionConnectorGrpcServicesServer) TriggerPostRestCallForTestInstructionExecution(ctx context.Context, processTestInstructionExecutionReveredRequest *fenixExecutionConnectorGrpcApi.ProcessTestInstructionExecutionReveredRequest) (finalTestInstructionExecutionResultMessage *fenixExecutionConnectorGrpcApi.FinalTestInstructionExecutionResultMessage, err error) {
+// TriggerPostRestCallForTestInstructionExecution
+// Trigger Connector to do RestCall with message sent with this request, used for testing
+func (s *fenixExecutionConnectorGrpcServicesServer) TriggerPostRestCallForTestInstructionExecution(ctx context.Context, processTestInstructionExecutionReveredRequest *fenixExecutionConnectorGrpcApi.ProcessTestInstructionExecutionReveredRequest) (triggerPostRestCallForTestInstructionExecutionResponse *fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse, err error) {
 
 	s.logger.WithFields(logrus.Fields{
-		"id": "5a978baf-a4ab-402b-b36c-dc3615a8a6e9",
+		"id": "69274850-6595-4664-81b3-86bc21904c9d",
 	}).Debug("Incoming 'gRPCServer - TriggerPostRestCallForTestInstructionExecution'")
 
 	defer s.logger.WithFields(logrus.Fields{
-		"id": "d822a6a1-8be5-4080-931b-5d9cf9771393",
+		"id": "c9bf391c-1d64-4a7b-a8dd-1a95c85548d5",
 	}).Debug("Outgoing 'gRPCServer - TriggerPostRestCallForTestInstructionExecution'")
 
 	// Calling system
 	userId := "External Trigger"
 
 	// Check if Client is using correct proto files version
-	returnMessage := common_config.IsCallerUsingCorrectConnectorProtoFileVersion(userId, processTestInstructionExecutionReveredRequest.ProtoFileVersionUsedByClient)
-	if returnMessage != nil {
+	var ackNackResponse *fenixExecutionWorkerGrpcApi.AckNackResponse
+	ackNackResponse = common_config.IsCallerUsingCorrectWorkerProtoFileVersion(userId, fenixExecutionWorkerGrpcApi.CurrentFenixExecutionWorkerProtoFileVersionEnum(processTestInstructionExecutionReveredRequest.ProtoFileVersionUsedByClient))
+	if ackNackResponse != nil {
 
-		// Create TimeStamp in gRPC-format
-		var grpcCurrentTimeStamp *timestamppb.Timestamp
-		grpcCurrentTimeStamp = timestamppb.Now()
-
-		finalTestInstructionExecutionResultMessage = &fenixExecutionConnectorGrpcApi.FinalTestInstructionExecutionResultMessage{
-			ClientSystemIdentification: &fenixExecutionConnectorGrpcApi.ClientSystemIdentificationMessage{
-				DomainUuid:                   string(Domains.DomainUUID_CA),
-				ProtoFileVersionUsedByCaller: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(common_config.GetHighestConnectorProtoFileVersion()),
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         ackNackResponse.AckNack,
+				Comments:                        ackNackResponse.Comments,
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
 			},
-			TestInstructionExecutionUuid:         processTestInstructionExecutionReveredRequest.TestInstruction.TestInstructionUuid,
-			TestInstructionExecutionStatus:       fenixExecutionConnectorGrpcApi.TestInstructionExecutionStatusEnum_TIE_CONTROLLED_INTERRUPTION,
-			TestInstructionExecutionEndTimeStamp: grpcCurrentTimeStamp,
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
 		}
 
-		return finalTestInstructionExecutionResultMessage, nil
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
 	}
 
-	//TODO Send RestCall
+	// *********************************************
+	//Convert fenixExecutionConnectorGrpcApi.ProcessTestInstructionExecutionReveredRequest into json
+	responseBodydata, err := json.Marshal(processTestInstructionExecutionReveredRequest)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'processTestInstructionExecutionReveredRequest' into json: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// Convert json into fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest
+	var processTestInstructionExecutionReveredRequestWorkerVersion *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest
+	err = json.Unmarshal(responseBodydata, processTestInstructionExecutionReveredRequestWorkerVersion)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'json for processTestInstructionExecutionReveredRequest' into Worker-version: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// *********************************************
+
+	// Convert 'TestInstruction' into useful structure later to be used by FangEngine
+	var processTestInstructionExecutionReversedResponse *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReversedResponse
+	var fangEngineRestApiMessageValues *restCallsToCAEngine.FangEngineRestApiMessageStruct
+	processTestInstructionExecutionReversedResponse, fangEngineRestApiMessageValues = messagesToExecutionWorkerServer.ConvertTestInstructionIntoFangEngineStructure(processTestInstructionExecutionReveredRequestWorkerVersion)
+
+	// *********************************************
+
+	//Convert fenixExecutionWorkerGrpcApi.processTestInstructionExecutionReversedResponse into json
+	responseBodydata, err = json.Marshal(processTestInstructionExecutionReversedResponse)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'processTestInstructionExecutionReversedResponse' into json: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// Convert json into fenixExecutionConnectorGrpcApi.processTestInstructionExecutionReversedResponse
+	var processTestInstructionExecutionReversedResponseConnectorVersion *fenixExecutionConnectorGrpcApi.ProcessTestInstructionExecutionReversedResponse
+	err = json.Unmarshal(responseBodydata, processTestInstructionExecutionReversedResponseConnectorVersion)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'json for processTestInstructionExecutionReversedResponse' into connector-version: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// *********************************************
+
+	// Send TestInstruction to FangEngine using RestCall
+	var finalTestInstructionExecutionResultMessage *fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage
+	finalTestInstructionExecutionResultMessage = messagesToExecutionWorkerServer.SendTestInstructionToFangEngineUsingRestCall(fangEngineRestApiMessageValues, processTestInstructionExecutionReveredRequestWorkerVersion)
+
+	// *********************************************
+
+	//Convert fenixExecutionWorkerGrpcApi.FinalTestInstructionExecutionResultMessage into json
+	responseBodydata, err = json.Marshal(finalTestInstructionExecutionResultMessage)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'finalTestInstructionExecutionResultMessage' into json: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// Convert json into fenixExecutionConnectorGrpcApi.FinalTestInstructionExecutionResultMessage
+	var finalTestInstructionExecutionResultMessageConnectorVersion *fenixExecutionConnectorGrpcApi.FinalTestInstructionExecutionResultMessage
+	err = json.Unmarshal(responseBodydata, finalTestInstructionExecutionResultMessageConnectorVersion)
+	if err != nil {
+		// Problem when converting into json
+		triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+			AckNackResponse: &fenixExecutionConnectorGrpcApi.AckNackResponse{
+				AckNack:                         false,
+				Comments:                        "Problem when converting 'json for finalTestInstructionExecutionResultMessage' into connector-version: " + err.Error(),
+				ErrorCodes:                      nil,
+				ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(ackNackResponse.ProtoFileVersionUsedByClient),
+			},
+			ProcessTestInstructionExecutionReversedResponse: nil,
+			FinalTestInstructionExecutionResultMessage:      nil,
+		}
+
+		return triggerPostRestCallForTestInstructionExecutionResponse, nil
+	}
+
+	// *********************************************
 
 	// Generate response
-	ackNackResponse = &fenixExecutionConnectorGrpcApi.AckNackResponse{
-		AckNack:                         true,
-		Comments:                        "",
-		ErrorCodes:                      nil,
-		ProtoFileVersionUsedByConnector: fenixExecutionConnectorGrpcApi.CurrentFenixExecutionConnectorProtoFileVersionEnum(common_config.GetHighestConnectorProtoFileVersion()),
+	triggerPostRestCallForTestInstructionExecutionResponse = &fenixExecutionConnectorGrpcApi.TriggerPostRestCallForTestInstructionExecutionResponse{
+		AckNackResponse: nil,
+		ProcessTestInstructionExecutionReversedResponse: processTestInstructionExecutionReversedResponseConnectorVersion,
+		FinalTestInstructionExecutionResultMessage:      finalTestInstructionExecutionResultMessageConnectorVersion,
 	}
 
-	return ackNackResponse, nil
+	return triggerPostRestCallForTestInstructionExecutionResponse, nil
 
 }
