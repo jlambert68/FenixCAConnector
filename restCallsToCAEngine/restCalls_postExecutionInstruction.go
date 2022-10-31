@@ -3,6 +3,7 @@ package restCallsToCAEngine
 import (
 	"FenixCAConnector/common_config"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -153,9 +154,17 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 		// Use FangEngine
 		fangEngineUrl = common_config.CAEngineAddress + fangEngineUrl
 	}
+	// Create Http-client
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 
 	// Do RestCall to FangEngine
-	restResponse, err = http.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer([]byte(attributesAsJson)))
+	restResponse, err = httpClient.Post(fangEngineUrl, "application/json; charset=utf-8", bytes.NewBuffer(attributesAsJson))
 	if err != nil {
 		common_config.Logger.WithFields(logrus.Fields{
 			"id":            "b98c2fb4-e717-4fc4-8d2c-6c791c523175",

@@ -1,4 +1,4 @@
-// TestInstruction 'AddSelectedSwift' for Custody Arrangement
+// TestInstructionExecution 'SettlementAgreement/AddSelectedSwift' for Custody Arrangement
 {
   "ProtoFileVersionUsedByClient": "VERSION_0_1",
   "TestInstruction": {
