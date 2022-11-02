@@ -42,37 +42,62 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 	}
 	*/
 
-	// Set up connection to Fenix Execution Worker
-	// When run on GCP, use credentials
-	var newGrpcClientConnection *grpc.ClientConn
-	if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
-		// Run on GCP
-		ctx, newGrpcClientConnection = dialFromGrpcurl(ctx)
-		remoteFenixExecutionWorkerServerConnection = newGrpcClientConnection
-		//remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(common_config.FenixExecutionWorkerAddressToDial, opts...)
-	} else {
-		// Run Local
-		remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(common_config.FenixExecutionWorkerAddressToDial, grpc.WithInsecure())
+	// slice with sleep time, in milliseconds, between each attempt to Dial to Worker
+	var sleepTimeBetweenDialAttempts []int
+	sleepTimeBetweenDialAttempts = []int{100, 100, 200, 200, 300, 300, 500, 500, 600, 1000} // Total: 3.6 seconds
+
+	// Do multiple attempts to do connection to Execution Worker
+	var numberOfDialAttempts int
+	var dialAttemptCounter int
+	numberOfDialAttempts = len(sleepTimeBetweenDialAttempts)
+	dialAttemptCounter = 0
+
+	for {
+
+		// Set up connection to Fenix Execution Worker
+		// When run on GCP, use credentials
+		var newGrpcClientConnection *grpc.ClientConn
+		if common_config.ExecutionLocationForFenixExecutionWorkerServer == common_config.GCP {
+			// Run on GCP
+			ctx, newGrpcClientConnection = dialFromGrpcurl(ctx)
+			remoteFenixExecutionWorkerServerConnection = newGrpcClientConnection
+			//remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(common_config.FenixExecutionWorkerAddressToDial, opts...)
+		} else {
+			// Run Local
+			remoteFenixExecutionWorkerServerConnection, err = grpc.Dial(common_config.FenixExecutionWorkerAddressToDial, grpc.WithInsecure())
+		}
+		if err != nil {
+			common_config.Logger.WithFields(logrus.Fields{
+				"ID": "50b59b1b-57ce-4c27-aa84-617f0cde3100",
+				"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
+				"error message": err,
+			}).Error("Did not connect to FenixExecutionServer via gRPC")
+
+			// Add to counter for how many Dial attempts that have been done
+			dialAttemptCounter = dialAttemptCounter + 1
+
+			// Only return the error after last attempt
+			if dialAttemptCounter >= numberOfDialAttempts {
+				return nil, err
+			}
+
+		} else {
+			common_config.Logger.WithFields(logrus.Fields{
+				"ID": "0c650bbc-45d0-4029-bd25-4ced9925a059",
+				"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
+			}).Info("gRPC connection OK to FenixExecutionServer")
+
+			// Creates a new Client
+			fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerConnectorGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
+
+			break
+		}
+
+		// Sleep for some time before retrying to connect
+		time.Sleep(time.Millisecond * time.Duration(sleepTimeBetweenDialAttempts[dialAttemptCounter-1]))
+
 	}
-	if err != nil {
-		common_config.Logger.WithFields(logrus.Fields{
-			"ID": "50b59b1b-57ce-4c27-aa84-617f0cde3100",
-			"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
-			"error message": err,
-		}).Error("Did not connect to FenixExecutionServer via gRPC")
 
-		return nil, err
-
-	} else {
-		common_config.Logger.WithFields(logrus.Fields{
-			"ID": "0c650bbc-45d0-4029-bd25-4ced9925a059",
-			"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
-		}).Info("gRPC connection OK to FenixExecutionServer")
-
-		// Creates a new Client
-		fenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerConnectorGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
-
-	}
 	return ctx, err
 }
 

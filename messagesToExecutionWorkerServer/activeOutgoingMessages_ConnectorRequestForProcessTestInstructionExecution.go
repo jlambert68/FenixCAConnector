@@ -82,7 +82,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 		common_config.Logger.WithFields(logrus.Fields{
 			"ID":  "d9ab0434-1121-4e2e-95e7-3e1cc99656b0",
 			"err": err,
-		}).Error("Couldn't open streamClient from Worker Server. Will wait 5 minutes and try again")
+		}).Error("Couldn't open streamClient from Worker Server. Will wait 1 second and try again")
 
 		return
 	}
@@ -110,7 +110,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 				common_config.Logger.WithFields(logrus.Fields{
 					"ID":  "3439f49f-d7d5-477e-9a6b-cfa5ed355bfe",
 					"err": err,
-				}).Error("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 5 seconds")
+				}).Error("Got some error when receiving TestInstructionExecutionsRequests from Worker, reconnect in 1 second")
 
 				done <- true //close(done)
 				return
@@ -163,7 +163,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) InitiateCo
 								"ID": "95dddb21-0895-4016-9cb5-97ab4568f30b",
 								"finalTestInstructionExecutionResultMessage": finalTestInstructionExecutionResultMessage,
 								"returnMessage": returnMessage,
-							}).Error("Couldn't send repsonse to Worker")
+							}).Error("Couldn't send response to Worker")
 						}
 					}
 				}()

@@ -53,32 +53,58 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendConnec
 
 	}
 
-	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorProcessTestInstructionExecutionReversedResponse(ctx, processTestInstructionExecutionReversedResponse)
+	// slice with sleep time, in milliseconds, between each attempt to do gRPC-call to Worker
+	var sleepTimeBetweenGrpcCallAttempts []int
+	sleepTimeBetweenGrpcCallAttempts = []int{100, 200, 300, 300, 500, 500, 1000, 1000, 1000, 1000} // Total: 5.9 seconds
 
-	// Shouldn't happen
-	if err != nil {
-		common_config.Logger.WithFields(logrus.Fields{
-			"ID":    "bb37e04d-2154-47df-8eca-ea076a132a59",
-			"error": err,
-		}).Error("Problem to do gRPC-call to Fenix Execution Worker for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
+	// Do multiple attempts to do gRPC-call to Execution Worker, when it fails
+	var numberOfgRPCCallAttempts int
+	var gRPCCallAttemptCounter int
+	numberOfgRPCCallAttempts = len(sleepTimeBetweenGrpcCallAttempts)
+	gRPCCallAttemptCounter = 0
 
-		return false, err.Error()
+	for {
 
-	} else if returnMessage.AckNack == false {
-		// FenixTestDataSyncServer couldn't handle gPRC call
-		common_config.Logger.WithFields(logrus.Fields{
-			"ID":                        "7763f7d1-9a5e-4407-b97b-0737455c6e54",
-			"Message from Fenix Worker": returnMessage.Comments,
-		}).Error("Problem to do gRPC-call to Worker for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
+		returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorProcessTestInstructionExecutionReversedResponse(ctx, processTestInstructionExecutionReversedResponse)
 
-		return false, err.Error()
+		// Add to counter for how many gRPC-call-attempts to Worker that have been done
+		gRPCCallAttemptCounter = gRPCCallAttemptCounter + 1
+
+		// Shouldn't happen
+		if err != nil {
+
+			// Only return the error after last attempt
+			if gRPCCallAttemptCounter >= numberOfgRPCCallAttempts {
+
+				common_config.Logger.WithFields(logrus.Fields{
+					"ID":    "bb37e04d-2154-47df-8eca-ea076a132a59",
+					"error": err,
+				}).Error("Problem to do gRPC-call to Fenix Execution Worker for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
+
+				return false, err.Error()
+			}
+
+			// Sleep for some time before retrying to connect
+			time.Sleep(time.Millisecond * time.Duration(sleepTimeBetweenGrpcCallAttempts[gRPCCallAttemptCounter-1]))
+
+		} else if returnMessage.AckNack == false {
+			// FenixTestDataSyncServer couldn't handle gPRC call
+			common_config.Logger.WithFields(logrus.Fields{
+				"ID":                        "7763f7d1-9a5e-4407-b97b-0737455c6e54",
+				"Message from Fenix Worker": returnMessage.Comments,
+			}).Error("Problem to do gRPC-call to Worker for 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
+
+			return false, err.Error()
+		} else {
+
+			common_config.Logger.WithFields(logrus.Fields{
+				"ID": "b48ae8cc-a145-4527-b417-b3bb815824fc",
+				"processTestInstructionExecutionReversedResponse": processTestInstructionExecutionReversedResponse,
+			}).Debug("Response regarding that worker received a TestInstruction to execute was successfully sent back to worker")
+
+			return returnMessage.AckNack, returnMessage.Comments
+
+		}
+
 	}
-
-	common_config.Logger.WithFields(logrus.Fields{
-		"ID": "b48ae8cc-a145-4527-b417-b3bb815824fc",
-		"processTestInstructionExecutionReversedResponse": processTestInstructionExecutionReversedResponse,
-	}).Debug("Response regarding that worker received a TestInstruction to execute was successfully sent back to worker")
-
-	return returnMessage.AckNack, returnMessage.Comments
-
 }

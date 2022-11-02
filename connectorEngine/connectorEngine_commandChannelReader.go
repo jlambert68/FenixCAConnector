@@ -22,7 +22,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) startCommandChannel
 			executionEngine.initiateConnectorRequestForProcessTestInstructionExecution()
 
 		case ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Seconds:
-			executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(1 * 5)
+			executionEngine.initiateConnectorRequestForProcessTestInstructionExecutionInXSeconds(1 * 1)
 
 		// No other command is supported
 		default:
@@ -67,7 +67,7 @@ func (executionEngine *TestInstructionExecutionEngineStruct) initiateConnectorRe
 
 			executionEngine.ongoingTimerOrConnectionForCallingWorkerForTestInstructionsToExecute = false
 
-			// Create Message for CommandChannel to retry to connect in 5 minutes
+			// Create Message for CommandChannel to retry to connect in 1 second
 			triggerTestInstructionExecutionResultMessage := &fenixExecutionConnectorGrpcApi.TriggerTestInstructionExecutionResultMessage{}
 			channelCommand := ChannelCommandStruct{
 				ChannelCommand: ChannelCommandTriggerRequestForTestInstructionExecutionToProcessIn5Seconds,

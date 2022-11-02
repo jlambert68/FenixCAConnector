@@ -14,7 +14,7 @@ import (
 func (s *fenixExecutionConnectorGrpcServicesServer) WorkerAreYouAlive(ctx context.Context, emptyParameter *fenixExecutionConnectorGrpcApi.EmptyParameter) (*fenixExecutionConnectorGrpcApi.AckNackResponse, error) {
 
 	s.logger.WithFields(logrus.Fields{
-		"id": "5c2d4e0c-904a-41d8-81bc-3123641aa6db",
+		"id": "dabd04a3-5357-4904-aceb-3493fa7396b6",
 	}).Debug("Incoming 'gRPCServer - ConnectorAreYouAlive'")
 
 	s.logger.WithFields(logrus.Fields{
