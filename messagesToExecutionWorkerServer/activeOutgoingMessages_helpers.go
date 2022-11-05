@@ -70,7 +70,8 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SetConnect
 			common_config.Logger.WithFields(logrus.Fields{
 				"ID": "50b59b1b-57ce-4c27-aa84-617f0cde3100",
 				"common_config.FenixExecutionWorkerAddressToDial": common_config.FenixExecutionWorkerAddressToDial,
-				"error message": err,
+				"error message":      err,
+				"dialAttemptCounter": dialAttemptCounter,
 			}).Error("Did not connect to FenixExecutionServer via gRPC")
 
 			// Add to counter for how many Dial attempts that have been done

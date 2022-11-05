@@ -14,6 +14,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"id": "db3419cd-f18b-4efa-b417-0d44cbf613e8",
+		"finalTestInstructionExecutionResultMessage": finalTestInstructionExecutionResultMessage,
 	}).Debug("Incoming 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
 
 	common_config.Logger.WithFields(logrus.Fields{

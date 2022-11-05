@@ -14,6 +14,7 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendConnec
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"id": "7deef335-37fb-462c-978c-5a97a52c207f",
+		"processTestInstructionExecutionReversedResponse": processTestInstructionExecutionReversedResponse,
 	}).Debug("Incoming 'SendConnectorProcessTestInstructionExecutionReversedResponseToFenixWorkerServer'")
 
 	common_config.Logger.WithFields(logrus.Fields{
