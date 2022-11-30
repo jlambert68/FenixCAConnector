@@ -12,7 +12,10 @@ import (
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/CustodyArrangement/TestInstructions"
 	"github.com/jlambert68/FenixTestInstructionsDataAdmin/TypeAndStructs"
 	"github.com/sirupsen/logrus"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionExecutionReveredRequest *fenixExecutionWorkerGrpcApi.ProcessTestInstructionExecutionReveredRequest) (fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct, err error) {
@@ -101,6 +104,13 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 
 func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct) (restResponse *http.Response, err error) {
 	fmt.Println("2. Performing Http Post...")
+
+	rand.Seed(time.Now().UnixNano())
+	min := 3
+	max := 10
+	myRandomNumber := rand.Intn(max-min+1) + min
+	fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
+	time.Sleep(time.Second * time.Duration(myRandomNumber))
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"id":                             "38c5fd40-0aee-4cd0-9107-0974331db0cc",
