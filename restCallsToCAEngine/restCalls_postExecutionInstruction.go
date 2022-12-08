@@ -103,14 +103,28 @@ func ConvertTestInstructionIntoFangEngineRestCallMessage(processTestInstructionE
 }
 
 func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngineRestApiMessageStruct) (restResponse *http.Response, err error) {
-	fmt.Println("2. Performing Http Post...")
 
-	rand.Seed(time.Now().UnixNano())
-	min := 3
-	max := 10
-	myRandomNumber := rand.Intn(max-min+1) + min
-	fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
-	time.Sleep(time.Second * time.Duration(myRandomNumber))
+	switch fangEngineRestApiMessageValues.FangEngineMethodNameNAME {
+
+	case FangEngineClassesAndMethods.FangEngine_MethodName_Name_CA_CustodyAccount_Search:
+		rand.Seed(time.Now().UnixNano())
+		min := 3
+		max := 7
+		myRandomNumber := rand.Intn(max-min+1) + min
+		fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
+		time.Sleep(time.Second * time.Duration(myRandomNumber))
+
+	default:
+		rand.Seed(time.Now().UnixNano())
+		//min := 3
+		//max := 7
+		myRandomNumber := 0 //rand.Intn(max-min+1) + min
+		fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
+		time.Sleep(time.Second * time.Duration(myRandomNumber))
+
+	}
+
+	fmt.Println("2. Performing Http Post...")
 
 	common_config.Logger.WithFields(logrus.Fields{
 		"id":                             "38c5fd40-0aee-4cd0-9107-0974331db0cc",
