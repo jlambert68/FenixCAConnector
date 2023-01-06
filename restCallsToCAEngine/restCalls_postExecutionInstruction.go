@@ -109,16 +109,16 @@ func PostTestInstructionUsingRestCall(fangEngineRestApiMessageValues *FangEngine
 	case FangEngineClassesAndMethods.FangEngine_MethodName_Name_CA_CustodyAccount_Search:
 		rand.Seed(time.Now().UnixNano())
 		min := 3
-		max := 7
+		max := 360
 		myRandomNumber := rand.Intn(max-min+1) + min
 		fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
 		time.Sleep(time.Second * time.Duration(myRandomNumber))
 
 	default:
 		rand.Seed(time.Now().UnixNano())
-		//min := 3
-		//max := 7
-		myRandomNumber := 0 //rand.Intn(max-min+1) + min
+		min := 800
+		max := 1000
+		myRandomNumber := rand.Intn(max-min+1) + min
 		fmt.Println("....sleeping for " + strconv.Itoa(myRandomNumber) + " seconds...")
 		time.Sleep(time.Second * time.Duration(myRandomNumber))
 

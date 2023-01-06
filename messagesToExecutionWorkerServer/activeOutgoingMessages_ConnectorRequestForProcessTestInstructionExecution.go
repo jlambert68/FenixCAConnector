@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"io"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -211,7 +212,12 @@ func ConvertTestInstructionIntoFangEngineStructure(processTestInstructionExecuti
 		}
 	} else {
 		// Generate duration for Execution:: TODO This is only for test and should be done in another way later
-		executionDuration := time.Minute * 5
+		rand.Seed(time.Now().UnixNano())
+		min := 800
+		max := 1000
+		myRandomNumber := rand.Intn(max-min+1) + min
+
+		executionDuration := time.Second * time.Duration(myRandomNumber)
 		timeAtDurationEnd := time.Now().Add(executionDuration)
 
 		// Generate OK response message to Worker

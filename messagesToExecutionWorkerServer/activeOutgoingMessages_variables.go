@@ -12,6 +12,7 @@ type MessagesToExecutionWorkerObjectStruct struct {
 	//GcpAccessToken *oauth2.Token
 	Gcp gcp.GcpObjectStruct
 	//CommandChannelReference *connectorEngine.ExecutionEngineChannelType
+	connectionToWorkerInitiated bool
 }
 
 // Variables used for contacting Fenix Execution Worker Server

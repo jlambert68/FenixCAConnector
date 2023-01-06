@@ -27,10 +27,12 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 
 	ctx = context.Background()
 
-	// Set up connection to Server
-	ctx, err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer(ctx)
-	if err != nil {
-		return false, err.Error()
+	// Set up connection to WorkerServer, if that is not already done
+	if toExecutionWorkerObject.connectionToWorkerInitiated == false {
+		_, err := toExecutionWorkerObject.SetConnectionToFenixExecutionWorkerServer(ctx)
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 
 	// Do gRPC-call
@@ -54,7 +56,12 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 
 	}
 
-	returnMessage, err := fenixExecutionWorkerGrpcClient.ConnectorReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
+	// Creates a new temporary client only to be used for this call
+	var tempFenixExecutionWorkerGrpcClient fenixExecutionWorkerGrpcApi.FenixExecutionWorkerConnectorGrpcServicesClient
+	tempFenixExecutionWorkerGrpcClient = fenixExecutionWorkerGrpcApi.NewFenixExecutionWorkerConnectorGrpcServicesClient(remoteFenixExecutionWorkerServerConnection)
+
+	// Do gRPC-call
+	returnMessage, err := tempFenixExecutionWorkerGrpcClient.ConnectorReportCompleteTestInstructionExecutionResult(ctx, finalTestInstructionExecutionResultMessage)
 
 	// Shouldn't happen
 	if err != nil {
@@ -62,6 +69,9 @@ func (toExecutionWorkerObject *MessagesToExecutionWorkerObjectStruct) SendReport
 			"ID":    "ebe601e0-14b9-42c5-8f8f-960acec80433",
 			"error": err,
 		}).Error("Problem to do gRPC-call to Fenix Execution Worker for 'SendReportCompleteTestInstructionExecutionResultToFenixWorkerServer'")
+
+		// Set that a new connection needs to be done next time
+		toExecutionWorkerObject.connectionToWorkerInitiated = false
 
 		return false, err.Error()
 
